@@ -1473,7 +1473,8 @@ namespace RNFS.Tests
             var promise = new MockPromise();
             manager.downloadFile(options, promise);
             manager.stopDownload(1);
-            await AssertRejectAsync(promise, ex => Assert.AreEqual("A task was canceled.", ex.Message, ex.Message));
+            string testString = "CANCELLED: job '1'";
+            await AssertRejectAsync(promise, ex => Assert.AreEqual(testString, ex.Message.Substring(0, testString.Length), ex.Message));
             Assert.IsFalse(new FileInfo(path).Exists);
         }
 

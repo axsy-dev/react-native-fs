@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <ProjectGuid>{746610D0-8693-11E7-A20D-BF83F7366778}</ProjectGuid>
+    <ProjectGuid>{8F7EE18F-8E79-4648-B442-9554443BE262}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RNFS</RootNamespace>

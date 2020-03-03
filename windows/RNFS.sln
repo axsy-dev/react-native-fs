@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNFS", "RNFs\RNFS.csproj", "{746610D0-8693-11E7-A20D-BF83F7366778}"
 EndProject
@@ -12,7 +12,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChakraBridge", "..\node_mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNFS.Tests", "RNFS.Tests\RNFS.Tests.csproj", "{8D2229AC-F6EC-4FBD-9AAC-FE4792DA98C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RNFS.Net46", "RNFS.Net46\RNFS.Net46.csproj", "{8F7EE18F-8E79-4648-B442-9554443BE262}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactNativeWebViewBridge", "..\node_modules\react-native-windows\ReactWindows\ReactNativeWebViewBridge\ReactNativeWebViewBridge.csproj", "{7596216B-669C-41F8-86DA-F3637F6545C0}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -113,24 +113,24 @@ Global
 		{8D2229AC-F6EC-4FBD-9AAC-FE4792DA98C6}.Release|x86.ActiveCfg = Release|x86
 		{8D2229AC-F6EC-4FBD-9AAC-FE4792DA98C6}.Release|x86.Build.0 = Release|x86
 		{8D2229AC-F6EC-4FBD-9AAC-FE4792DA98C6}.Release|x86.Deploy.0 = Release|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|ARM.ActiveCfg = Debug|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|ARM.Build.0 = Debug|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|x64.ActiveCfg = Debug|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|x64.Build.0 = Debug|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|x86.ActiveCfg = Debug|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Debug|x86.Build.0 = Debug|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|ARM.ActiveCfg = Development|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|ARM.Build.0 = Development|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|x64.ActiveCfg = Development|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|x64.Build.0 = Development|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|x86.ActiveCfg = Development|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Development|x86.Build.0 = Development|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|ARM.ActiveCfg = Release|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|ARM.Build.0 = Release|ARM
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|x64.ActiveCfg = Release|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|x64.Build.0 = Release|x64
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|x86.ActiveCfg = Release|x86
-		{8F7EE18F-8E79-4648-B442-9554443BE262}.Release|x86.Build.0 = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|ARM.Build.0 = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x64.ActiveCfg = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x64.Build.0 = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x86.ActiveCfg = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Debug|x86.Build.0 = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|ARM.ActiveCfg = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|ARM.Build.0 = Debug|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|x64.ActiveCfg = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|x64.Build.0 = Debug|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|x86.ActiveCfg = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Development|x86.Build.0 = Debug|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|ARM.ActiveCfg = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|ARM.Build.0 = Release|ARM
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x64.ActiveCfg = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x64.Build.0 = Release|x64
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x86.ActiveCfg = Release|x86
+		{7596216B-669C-41F8-86DA-F3637F6545C0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
