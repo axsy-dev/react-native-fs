@@ -37,5 +37,8 @@
   "peerDependencies": {
     "react-native": "^0.59.5",
     "react-native-windows": "^0.57.2"
-  }
+  },
+  "_resolved": "",
+  "_integrity": "",
+  "_from": "react-native-fs@git+https://github.com/axsy-dev/react-native-fs.git#f1a3c7b"
 }
