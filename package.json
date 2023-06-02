@@ -34,7 +34,7 @@
     "flow-bin": "^0.109.0",
     "prop-types": "^15.7.2",
     "react-native": "0.67.5",
-    "react-native-windows": "0.67.6"
+    "react-native-windows": "0.67.18"
   },
   "peerDependencies": {
     "react-native": "^0.59.5",
