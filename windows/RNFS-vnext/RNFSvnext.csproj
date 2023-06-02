@@ -136,7 +136,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ItemGroup>
     <ProjectReference Include="..\..\..\react-native-windows\Microsoft.ReactNative.Managed\Microsoft.ReactNative.Managed.csproj">
       <Project>{f2824844-ce15-4242-9420-308923cd76c3}</Project>
       <Name>Microsoft.ReactNative.Managed</Name>
