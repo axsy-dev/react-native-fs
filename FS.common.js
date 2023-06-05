@@ -16,6 +16,7 @@ var RNFS_NativeEventEmitter = new NativeEventEmitter(RNFSManager);
 var base64 = require("base-64");
 var utf8 = require("utf8");
 var isIOS = require("react-native").Platform.OS === "ios";
+var isWindows = require("react-native").Platform.OS === "windows";
 
 var RNFSFileTypeRegular = RNFSManager.RNFSFileTypeRegular;
 var RNFSFileTypeDirectory = RNFSManager.RNFSFileTypeDirectory;
@@ -768,6 +769,14 @@ var RNFS = {
 
   scanFile(path: string): Promise<ReadDirItem[]> {
     return RNFSManager.scanFile(path);
+  },
+
+  copyToPictures(path: string): Promise<boolean> {
+    if (isWindows) {
+      return RNFSManager.copyToPictures(path);
+    }
+
+    throw new Error("copyToPictures is only available on Windows");
   },
 
   MainBundlePath: RNFSManager.RNFSMainBundlePath,
