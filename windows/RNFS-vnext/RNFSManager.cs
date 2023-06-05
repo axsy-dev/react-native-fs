@@ -384,9 +384,8 @@ namespace RNFSvnext
         {
             try
             {
-                var file = await StorageFile.GetFileFromPathAsync(filepath);
-                var folder = KnownFolders.PicturesLibrary;
-                await file.CopyAsync(folder, file.Name, NameCollisionOption.ReplaceExisting);
+                var srcFile = await StorageFile.GetFileFromPathAsync(filepath);
+                await srcFile.CopyAsync(KnownFolders.PicturesLibrary, srcFile.Name, NameCollisionOption.ReplaceExisting);
                 promise.Resolve(true);
             }
             catch (Exception e)
