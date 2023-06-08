@@ -380,6 +380,21 @@ namespace RNFSvnext
         }
 
         [ReactMethod]
+        public async void copyToPictures(string filepath, IReactPromise<bool> promise)
+        {
+            try
+            {
+                var srcFile = await StorageFile.GetFileFromPathAsync(filepath);
+                await srcFile.CopyAsync(KnownFolders.PicturesLibrary, srcFile.Name, NameCollisionOption.ReplaceExisting);
+                promise.Resolve(true);
+            }
+            catch (Exception e)
+            {
+                Reject(promise, filepath, e);
+            }
+        }
+
+        [ReactMethod]
         public async void readDir(string directory, IReactPromise<JSValue> promise)
         {
             try
