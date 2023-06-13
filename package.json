@@ -6,7 +6,8 @@
   "typings": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "flow": "flow; test $? -eq 0 -o $? -eq 2"
+    "flow": "flow; test $? -eq 0 -o $? -eq 2",
+    "windows": "react-native run-windows"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,8 @@
     "flow-bin": "^0.109.0",
     "prop-types": "^15.7.2",
     "react-native": "0.67.5",
-    "react-native-windows": "0.67.18"
+    "react-native-windows": "0.67.18",
+    "metro-config": "^0.66.2"
   },
   "peerDependencies": {
     "react-native": "^0.59.5",
