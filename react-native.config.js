@@ -1,7 +1,1 @@
-module.exports = {
-  dependency: {
-    platforms: {
-      windows: null,
-    },
-  },
-};
+module.exports = {};
