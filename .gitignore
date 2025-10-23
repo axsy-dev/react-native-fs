@@ -92,3 +92,5 @@ nitrogen/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.pnp.cjs
+.pnp.loader.mjs

@@ -38,7 +38,7 @@
     "format": "prettier --check .",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "check": "yarn run lint && yarn run typecheck && yarn run format",
-    "prepare": "rimraf lib && bob build"
+    "prepare": "del-cli lib && bob build"
   },
   "repository": {
     "type": "git",
@@ -86,7 +86,6 @@
     "react-native": "0.73.0",
     "react-native-builder-bob": "^0.40.13",
     "release-it": "^19.0.4",
-    "rimraf": "^6.0.1",
     "turbo": "^2.5.6",
     "typescript": "5.5.3"
   },
