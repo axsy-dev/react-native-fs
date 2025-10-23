@@ -1,31 +1,22 @@
-/**
- * React Native FS
- * @flow
- */
+import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
+import * as base64 from "base-64";
+import * as utf8 from "utf8";
 
-'use strict';
+const RNFSManager = NativeModules.RNFSManager;
+const isIOS = Platform.OS === "ios";
 
-// This file supports both iOS and Android
+const RNFSFileTypeRegular = RNFSManager.RNFSFileTypeRegular;
+const RNFSFileTypeDirectory = RNFSManager.RNFSFileTypeDirectory;
 
-var RNFSManager = require('react-native').NativeModules.RNFSManager;
+let jobId = 0;
 
-var NativeAppEventEmitter = require('react-native').NativeAppEventEmitter;  // iOS
-var DeviceEventEmitter = require('react-native').DeviceEventEmitter;        // Android
-var base64 = require('base-64');
-var utf8 = require('utf8');
-var isIOS = require('react-native').Platform.OS === 'ios';
-
-var RNFSFileTypeRegular = RNFSManager.RNFSFileTypeRegular;
-var RNFSFileTypeDirectory = RNFSManager.RNFSFileTypeDirectory;
-
-var jobId = 0;
-
-var getJobId = () => {
+const getJobId = () => {
   jobId += 1;
   return jobId;
 };
 
-var normalizeFilePath = (path: string) => (path.startsWith('file://') ? path.slice(7) : path);
+const normalizeFilePath = (path: string) =>
+  path.startsWith("file://") ? path.slice(7) : path;
 
 type MkdirOptions = {
   NSURLIsExcludedFromBackupKey?: boolean; // iOS only
@@ -37,70 +28,70 @@ type FileOptions = {
 };
 
 type ReadDirItem = {
-  ctime: ?Date;    // The creation date of the file (iOS only)
-  mtime: ?Date;    // The last modified date of the file
-  name: string;     // The name of the item
-  path: string;     // The absolute path to the item
-  size: string;     // Size in bytes
-  isFile: () => boolean;        // Is the file just a file?
-  isDirectory: () => boolean;   // Is the file a directory?
+  ctime: Date | null | undefined; // The creation date of the file (iOS only)
+  mtime: Date | null | undefined; // The last modified date of the file
+  name: string; // The name of the item
+  path: string; // The absolute path to the item
+  size: string; // Size in bytes
+  isFile: () => boolean; // Is the file just a file?
+  isDirectory: () => boolean; // Is the file a directory?
 };
 
 type StatResult = {
-  name: ?string;     // The name of the item TODO: why is this not documented?
-  path: string;     // The absolute path to the item
-  size: string;     // Size in bytes
-  mode: number;     // UNIX file mode
-  ctime: number;    // Created date
-  mtime: number;    // Last modified date
-  originalFilepath: string;    // In case of content uri this is the pointed file path, otherwise is the same as path
-  isFile: () => boolean;        // Is the file just a file?
-  isDirectory: () => boolean;   // Is the file a directory?
+  name: string | null | undefined; // The name of the item TODO: why is this not documented?
+  path: string; // The absolute path to the item
+  size: string; // Size in bytes
+  mode: number; // UNIX file mode
+  ctime: number; // Created date
+  mtime: number; // Last modified date
+  originalFilepath: string; // In case of content uri this is the pointed file path, otherwise is the same as path
+  isFile: () => boolean; // Is the file just a file?
+  isDirectory: () => boolean; // Is the file a directory?
 };
 
 type Headers = { [name: string]: string };
 type Fields = { [name: string]: string };
 
 type DownloadFileOptions = {
-  fromUrl: string;          // URL to download file from
-  toFile: string;           // Local filesystem path to save the file to
-  headers?: Headers;        // An object of headers to be passed to the server
-  background?: boolean;     // Continue the download in the background after the app terminates (iOS only)
-  discretionary?: boolean;  // Allow the OS to control the timing and speed of the download to improve perceived performance  (iOS only)
-  cacheable?: boolean;      // Whether the download can be stored in the shared NSURLCache (iOS only)
+  fromUrl: string; // URL to download file from
+  toFile: string; // Local filesystem path to save the file to
+  headers?: Headers; // An object of headers to be passed to the server
+  background?: boolean; // Continue the download in the background after the app terminates (iOS only)
+  discretionary?: boolean; // Allow the OS to control the timing and speed of the download to improve perceived performance  (iOS only)
+  cacheable?: boolean; // Whether the download can be stored in the shared NSURLCache (iOS only)
   progressDivider?: number;
   begin?: (res: DownloadBeginCallbackResult) => void;
   progress?: (res: DownloadProgressCallbackResult) => void;
-  resumable?: () => void;    // only supported on iOS yet
+  resumable?: () => void; // only supported on iOS yet
   connectionTimeout?: number; // only supported on Android yet
-  readTimeout?: number;       // supported on Android and iOS
+  readTimeout?: number; // supported on Android and iOS
 };
 
 type DownloadBeginCallbackResult = {
-  jobId: number;          // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  statusCode: number;     // The HTTP status code
-  contentLength: number;  // The total size in bytes of the download resource
-  headers: Headers;       // The HTTP response headers from the server
+  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
+  statusCode: number; // The HTTP status code
+  contentLength: number; // The total size in bytes of the download resource
+  headers: Headers; // The HTTP response headers from the server
 };
 
 type DownloadProgressCallbackResult = {
-  jobId: number;          // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  contentLength: number;  // The total size in bytes of the download resource
-  bytesWritten: number;   // The number of bytes written to the file so far
+  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
+  contentLength: number; // The total size in bytes of the download resource
+  bytesWritten: number; // The number of bytes written to the file so far
 };
 
 type DownloadResult = {
-  jobId: number;          // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  statusCode: number;     // The HTTP status code
-  bytesWritten: number;   // The number of bytes written to the file
+  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
+  statusCode: number; // The HTTP status code
+  bytesWritten: number; // The number of bytes written to the file
 };
 
 type UploadFileOptions = {
-  toUrl: string;            // URL to upload file to
-  files: UploadFileItem[];  // An array of objects with the file information to be uploaded.
-  headers?: Headers;        // An object of headers to be passed to the server
-  fields?: Fields;          // An object of fields to be passed to the server
-  method?: string;          // Default is 'POST', supports 'POST' and 'PUT'
+  toUrl: string; // URL to upload file to
+  files: UploadFileItem[]; // An array of objects with the file information to be uploaded.
+  headers?: Headers; // An object of headers to be passed to the server
+  fields?: Fields; // An object of fields to be passed to the server
+  method?: string; // Default is 'POST', supports 'POST' and 'PUT'
   beginCallback?: (res: UploadBeginCallbackResult) => void; // deprecated
   progressCallback?: (res: UploadProgressCallbackResult) => void; // deprecated
   begin?: (res: UploadBeginCallbackResult) => void;
@@ -108,61 +99,67 @@ type UploadFileOptions = {
 };
 
 type UploadFileItem = {
-  name: string;       // Name of the file, if not defined then filename is used
-  filename: string;   // Name of file
-  filepath: string;   // Path to file
-  filetype: string;   // The mimetype of the file to be uploaded, if not defined it will get mimetype from `filepath` extension
+  name: string; // Name of the file, if not defined then filename is used
+  filename: string; // Name of file
+  filepath: string; // Path to file
+  filetype: string; // The mimetype of the file to be uploaded, if not defined it will get mimetype from `filepath` extension
 };
 
 type UploadBeginCallbackResult = {
-  jobId: number;        // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
+  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
 };
 
 type UploadProgressCallbackResult = {
-  jobId: number;                      // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
-  totalBytesExpectedToSend: number;   // The total number of bytes that will be sent to the server
-  totalBytesSent: number;             // The number of bytes sent to the server
+  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
+  totalBytesExpectedToSend: number; // The total number of bytes that will be sent to the server
+  totalBytesSent: number; // The number of bytes sent to the server
 };
 
 type UploadResult = {
-  jobId: number;        // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
-  statusCode: number;   // The HTTP status code
-  headers: Headers;     // The HTTP response headers from the server
-  body: string;         // The HTTP response body
+  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
+  statusCode: number; // The HTTP status code
+  headers: Headers; // The HTTP response headers from the server
+  body: string; // The HTTP response body
 };
 
 type FSInfoResult = {
-  totalSpace: number;   // The total amount of storage space on the device (in bytes).
-  freeSpace: number;    // The amount of available storage space on the device (in bytes).
+  totalSpace: number; // The total amount of storage space on the device (in bytes).
+  freeSpace: number; // The amount of available storage space on the device (in bytes).
 };
 
 /**
  * Generic function used by readFile and readFileAssets
  */
-function readFileGeneric(filepath: string, encodingOrOptions: ?string, command: Function) {
+function readFileGeneric(
+  filepath: string,
+  encodingOrOptions: string | null | undefined,
+  command: Function
+) {
   var options = {
-    encoding: 'utf8'
+    encoding: "utf8",
   };
 
   if (encodingOrOptions) {
-    if (typeof encodingOrOptions === 'string') {
+    if (typeof encodingOrOptions === "string") {
       options.encoding = encodingOrOptions;
-    } else if (typeof encodingOrOptions === 'object') {
+    } else if (typeof encodingOrOptions === "object") {
       options = encodingOrOptions;
     }
   }
 
-  return command(normalizeFilePath(filepath)).then((b64) => {
+  return command(normalizeFilePath(filepath)).then((b64: string) => {
     var contents;
 
-    if (options.encoding === 'utf8') {
+    if (options.encoding === "utf8") {
       contents = utf8.decode(base64.decode(b64));
-    } else if (options.encoding === 'ascii') {
+    } else if (options.encoding === "ascii") {
       contents = base64.decode(b64);
-    } else if (options.encoding === 'base64') {
+    } else if (options.encoding === "base64") {
       contents = b64;
     } else {
-      throw new Error('Invalid encoding type "' + String(options.encoding) + '"');
+      throw new Error(
+        'Invalid encoding type "' + String(options.encoding) + '"'
+      );
     }
 
     return contents;
@@ -172,11 +169,14 @@ function readFileGeneric(filepath: string, encodingOrOptions: ?string, command: 
 /**
  * Generic function used by readDir and readDirAssets
  */
-function readDirGeneric(dirpath: string, command: Function) {
-  return command(normalizeFilePath(dirpath)).then(files => {
-    return files.map(file => ({
-      ctime: file.ctime && new Date(file.ctime * 1000) || null,
-      mtime: file.mtime && new Date(file.mtime * 1000) || null,
+function readDirGeneric(
+  dirpath: string,
+  command: Function
+): Promise<ReadDirItem[]> {
+  return command(normalizeFilePath(dirpath)).then((files: any[]) => {
+    return files.map((file: any) => ({
+      ctime: (file.ctime && new Date(file.ctime * 1000)) || null,
+      mtime: (file.mtime && new Date(file.mtime * 1000)) || null,
       name: file.name,
       path: file.path,
       size: file.size,
@@ -187,17 +187,34 @@ function readDirGeneric(dirpath: string, command: Function) {
 }
 
 var RNFS = {
-
   mkdir(filepath: string, options: MkdirOptions = {}): Promise<void> {
-    return RNFSManager.mkdir(normalizeFilePath(filepath), options).then(() => void 0);
+    return RNFSManager.mkdir(normalizeFilePath(filepath), options).then(
+      () => void 0
+    );
   },
 
-  moveFile(filepath: string, destPath: string, options: FileOptions = {}): Promise<void> {
-    return RNFSManager.moveFile(normalizeFilePath(filepath), normalizeFilePath(destPath), options).then(() => void 0);
+  moveFile(
+    filepath: string,
+    destPath: string,
+    options: FileOptions = {}
+  ): Promise<void> {
+    return RNFSManager.moveFile(
+      normalizeFilePath(filepath),
+      normalizeFilePath(destPath),
+      options
+    ).then(() => void 0);
   },
 
-  copyFile(filepath: string, destPath: string, options: FileOptions = {}): Promise<void> {
-    return RNFSManager.copyFile(normalizeFilePath(filepath), normalizeFilePath(destPath), options).then(() => void 0);
+  copyFile(
+    filepath: string,
+    destPath: string,
+    options: FileOptions = {}
+  ): Promise<void> {
+    return RNFSManager.copyFile(
+      normalizeFilePath(filepath),
+      normalizeFilePath(destPath),
+      options
+    ).then(() => void 0);
   },
 
   pathForBundle(bundleNamed: string): Promise<string> {
@@ -232,7 +249,7 @@ var RNFS = {
     RNFSManager.resumeDownload(jobId);
   },
 
-  isResumable(jobId: number): Promise<bool> {
+  isResumable(jobId: number): Promise<boolean> {
     return RNFSManager.isResumable(jobId);
   },
 
@@ -251,7 +268,7 @@ var RNFS = {
   // Android-only
   readDirAssets(dirpath: string): Promise<ReadDirItem[]> {
     if (!RNFSManager.readDirAssets) {
-      throw new Error('readDirAssets is not available on this platform');
+      throw new Error("readDirAssets is not available on this platform");
     }
     return readDirGeneric(dirpath, RNFSManager.readDirAssets);
   },
@@ -259,7 +276,7 @@ var RNFS = {
   // Android-only
   existsAssets(filepath: string) {
     if (!RNFSManager.existsAssets) {
-      throw new Error('existsAssets is not available on this platform');
+      throw new Error("existsAssets is not available on this platform");
     }
     return RNFSManager.existsAssets(filepath);
   },
@@ -267,34 +284,40 @@ var RNFS = {
   // Android-only
   existsRes(filename: string) {
     if (!RNFSManager.existsRes) {
-      throw new Error('existsRes is not available on this platform');
+      throw new Error("existsRes is not available on this platform");
     }
     return RNFSManager.existsRes(filename);
   },
 
   // Node style version (lowercase d). Returns just the names
   readdir(dirpath: string): Promise<string[]> {
-    return RNFS.readDir(normalizeFilePath(dirpath)).then(files => {
-      return files.map(file => file.name);
+    return RNFS.readDir(normalizeFilePath(dirpath)).then((files) => {
+      return files.map((file) => file.name);
     });
   },
 
   // setReadable for Android
-  setReadable(filepath: string, readable: boolean, ownerOnly: boolean): Promise<boolean> {
-    return RNFSManager.setReadable(filepath, readable, ownerOnly).then((result) => {
-      return result;
-    })
+  setReadable(
+    filepath: string,
+    readable: boolean,
+    ownerOnly: boolean
+  ): Promise<boolean> {
+    return RNFSManager.setReadable(filepath, readable, ownerOnly).then(
+      (result: boolean) => {
+        return result;
+      }
+    );
   },
 
   stat(filepath: string): Promise<StatResult> {
-    return RNFSManager.stat(normalizeFilePath(filepath)).then((result) => {
+    return RNFSManager.stat(normalizeFilePath(filepath)).then((result: any) => {
       return {
-        'path': filepath,
-        'ctime': new Date(result.ctime * 1000),
-        'mtime': new Date(result.mtime * 1000),
-        'size': result.size,
-        'mode': result.mode,
-        'originalFilepath': result.originalFilepath,
+        path: filepath,
+        ctime: new Date(result.ctime * 1000),
+        mtime: new Date(result.mtime * 1000),
+        size: result.size,
+        mode: result.mode,
+        originalFilepath: result.originalFilepath,
         isFile: () => result.type === RNFSFileTypeRegular,
         isDirectory: () => result.type === RNFSFileTypeDirectory,
       };
@@ -305,50 +328,69 @@ var RNFS = {
     return readFileGeneric(filepath, encodingOrOptions, RNFSManager.readFile);
   },
 
-  read(filepath: string, length: number = 0, position: number = 0, encodingOrOptions?: any): Promise<string> {
+  read(
+    filepath: string,
+    length: number = 0,
+    position: number = 0,
+    encodingOrOptions?: any
+  ): Promise<string> {
     var options = {
-      encoding: 'utf8'
+      encoding: "utf8",
     };
 
     if (encodingOrOptions) {
-      if (typeof encodingOrOptions === 'string') {
+      if (typeof encodingOrOptions === "string") {
         options.encoding = encodingOrOptions;
-      } else if (typeof encodingOrOptions === 'object') {
+      } else if (typeof encodingOrOptions === "object") {
         options = encodingOrOptions;
       }
     }
 
-    return RNFSManager.read(normalizeFilePath(filepath), length, position).then((b64) => {
-      var contents;
+    return RNFSManager.read(normalizeFilePath(filepath), length, position).then(
+      (b64: string) => {
+        var contents;
 
-      if (options.encoding === 'utf8') {
-        contents = utf8.decode(base64.decode(b64));
-      } else if (options.encoding === 'ascii') {
-        contents = base64.decode(b64);
-      } else if (options.encoding === 'base64') {
-        contents = b64;
-      } else {
-        throw new Error('Invalid encoding type "' + String(options.encoding) + '"');
+        if (options.encoding === "utf8") {
+          contents = utf8.decode(base64.decode(b64 as string));
+        } else if (options.encoding === "ascii") {
+          contents = base64.decode(b64 as string);
+        } else if (options.encoding === "base64") {
+          contents = b64 as string;
+        } else {
+          throw new Error(
+            ('Invalid encoding type "' +
+              String(options.encoding) +
+              '"') as string
+          );
+        }
+
+        return contents;
       }
-
-      return contents;
-    });
+    );
   },
 
   // Android only
   readFileAssets(filepath: string, encodingOrOptions?: any): Promise<string> {
     if (!RNFSManager.readFileAssets) {
-      throw new Error('readFileAssets is not available on this platform');
+      throw new Error("readFileAssets is not available on this platform");
     }
-    return readFileGeneric(filepath, encodingOrOptions, RNFSManager.readFileAssets);
+    return readFileGeneric(
+      filepath,
+      encodingOrOptions,
+      RNFSManager.readFileAssets
+    );
   },
 
   // Android only
   readFileRes(filename: string, encodingOrOptions?: any): Promise<string> {
     if (!RNFSManager.readFileRes) {
-      throw new Error('readFileRes is not available on this platform');
+      throw new Error("readFileRes is not available on this platform");
     }
-    return readFileGeneric(filename, encodingOrOptions, RNFSManager.readFileRes);
+    return readFileGeneric(
+      filename,
+      encodingOrOptions,
+      RNFSManager.readFileRes
+    );
   },
 
   hash(filepath: string, algorithm: string): Promise<string> {
@@ -358,26 +400,46 @@ var RNFS = {
   // Android only
   copyFileAssets(filepath: string, destPath: string) {
     if (!RNFSManager.copyFileAssets) {
-      throw new Error('copyFileAssets is not available on this platform');
+      throw new Error("copyFileAssets is not available on this platform");
     }
-    return RNFSManager.copyFileAssets(normalizeFilePath(filepath), normalizeFilePath(destPath)).then(() => void 0);
+    return RNFSManager.copyFileAssets(
+      normalizeFilePath(filepath),
+      normalizeFilePath(destPath)
+    ).then(() => void 0);
   },
 
   // Android only
   copyFileRes(filename: string, destPath: string) {
     if (!RNFSManager.copyFileRes) {
-      throw new Error('copyFileRes is not available on this platform');
+      throw new Error("copyFileRes is not available on this platform");
     }
-    return RNFSManager.copyFileRes(filename, normalizeFilePath(destPath)).then(() => void 0);
+    return RNFSManager.copyFileRes(filename, normalizeFilePath(destPath)).then(
+      () => void 0
+    );
   },
 
   // iOS only
   // Copies fotos from asset-library (camera-roll) to a specific location
   // with a given width or height
   // @see: https://developer.apple.com/reference/photos/phimagemanager/1616964-requestimageforasset
-  copyAssetsFileIOS(imageUri: string, destPath: string, width: number, height: number,
-    scale: number = 1.0, compression: number = 1.0, resizeMode: string = 'contain'): Promise<string> {
-    return RNFSManager.copyAssetsFileIOS(imageUri, destPath, width, height, scale, compression, resizeMode);
+  copyAssetsFileIOS(
+    imageUri: string,
+    destPath: string,
+    width: number,
+    height: number,
+    scale: number = 1.0,
+    compression: number = 1.0,
+    resizeMode: string = "contain"
+  ): Promise<string> {
+    return RNFSManager.copyAssetsFileIOS(
+      imageUri,
+      destPath,
+      width,
+      height,
+      scale,
+      compression,
+      resizeMode
+    );
   },
 
   // iOS only
@@ -388,57 +450,69 @@ var RNFS = {
     return RNFSManager.copyAssetsVideoIOS(imageUri, destPath);
   },
 
-  writeFile(filepath: string, contents: string, encodingOrOptions?: any): Promise<void> {
+  writeFile(
+    filepath: string,
+    contents: string,
+    encodingOrOptions?: any
+  ): Promise<void> {
     var b64;
 
     var options = {
-      encoding: 'utf8'
+      encoding: "utf8",
     };
 
     if (encodingOrOptions) {
-      if (typeof encodingOrOptions === 'string') {
+      if (typeof encodingOrOptions === "string") {
         options.encoding = encodingOrOptions;
-      } else if (typeof encodingOrOptions === 'object') {
+      } else if (typeof encodingOrOptions === "object") {
         options = {
           ...options,
-          ...encodingOrOptions
+          ...encodingOrOptions,
         };
       }
     }
 
-    if (options.encoding === 'utf8') {
+    if (options.encoding === "utf8") {
       b64 = base64.encode(utf8.encode(contents));
-    } else if (options.encoding === 'ascii') {
+    } else if (options.encoding === "ascii") {
       b64 = base64.encode(contents);
-    } else if (options.encoding === 'base64') {
+    } else if (options.encoding === "base64") {
       b64 = contents;
     } else {
       throw new Error('Invalid encoding type "' + options.encoding + '"');
     }
 
-    return RNFSManager.writeFile(normalizeFilePath(filepath), b64, options).then(() => void 0);
+    return RNFSManager.writeFile(
+      normalizeFilePath(filepath),
+      b64,
+      options
+    ).then(() => void 0);
   },
 
-  appendFile(filepath: string, contents: string, encodingOrOptions?: any): Promise<void> {
+  appendFile(
+    filepath: string,
+    contents: string,
+    encodingOrOptions?: any
+  ): Promise<void> {
     var b64;
 
     var options = {
-      encoding: 'utf8'
+      encoding: "utf8",
     };
 
     if (encodingOrOptions) {
-      if (typeof encodingOrOptions === 'string') {
+      if (typeof encodingOrOptions === "string") {
         options.encoding = encodingOrOptions;
-      } else if (typeof encodingOrOptions === 'object') {
+      } else if (typeof encodingOrOptions === "object") {
         options = encodingOrOptions;
       }
     }
 
-    if (options.encoding === 'utf8') {
+    if (options.encoding === "utf8") {
       b64 = base64.encode(utf8.encode(contents));
-    } else if (options.encoding === 'ascii') {
+    } else if (options.encoding === "ascii") {
       b64 = base64.encode(contents);
-    } else if (options.encoding === 'base64') {
+    } else if (options.encoding === "base64") {
       b64 = contents;
     } else {
       throw new Error('Invalid encoding type "' + options.encoding + '"');
@@ -447,26 +521,31 @@ var RNFS = {
     return RNFSManager.appendFile(normalizeFilePath(filepath), b64);
   },
 
-  write(filepath: string, contents: string, position?: number, encodingOrOptions?: any): Promise<void> {
+  write(
+    filepath: string,
+    contents: string,
+    position?: number,
+    encodingOrOptions?: any
+  ): Promise<void> {
     var b64;
 
     var options = {
-      encoding: 'utf8'
+      encoding: "utf8",
     };
 
     if (encodingOrOptions) {
-      if (typeof encodingOrOptions === 'string') {
+      if (typeof encodingOrOptions === "string") {
         options.encoding = encodingOrOptions;
-      } else if (typeof encodingOrOptions === 'object') {
+      } else if (typeof encodingOrOptions === "object") {
         options = encodingOrOptions;
       }
     }
 
-    if (options.encoding === 'utf8') {
+    if (options.encoding === "utf8") {
       b64 = base64.encode(utf8.encode(contents));
-    } else if (options.encoding === 'ascii') {
+    } else if (options.encoding === "ascii") {
       b64 = base64.encode(contents);
-    } else if (options.encoding === 'base64') {
+    } else if (options.encoding === "base64") {
       b64 = contents;
     } else {
       throw new Error('Invalid encoding type "' + options.encoding + '"');
@@ -476,32 +555,67 @@ var RNFS = {
       position = -1;
     }
 
-    return RNFSManager.write(normalizeFilePath(filepath), b64, position).then(() => void 0);
+    return RNFSManager.write(normalizeFilePath(filepath), b64, position).then(
+      () => void 0
+    );
   },
 
-  downloadFile(options: DownloadFileOptions): { jobId: number, promise: Promise<DownloadResult> } {
-    if (typeof options !== 'object') throw new Error('downloadFile: Invalid value for argument `options`');
-    if (typeof options.fromUrl !== 'string') throw new Error('downloadFile: Invalid value for property `fromUrl`');
-    if (typeof options.toFile !== 'string') throw new Error('downloadFile: Invalid value for property `toFile`');
-    if (options.headers && typeof options.headers !== 'object') throw new Error('downloadFile: Invalid value for property `headers`');
-    if (options.background && typeof options.background !== 'boolean') throw new Error('downloadFile: Invalid value for property `background`');
-    if (options.progressDivider && typeof options.progressDivider !== 'number') throw new Error('downloadFile: Invalid value for property `progressDivider`');
-    if (options.readTimeout && typeof options.readTimeout !== 'number') throw new Error('downloadFile: Invalid value for property `readTimeout`');
-    if (options.connectionTimeout && typeof options.connectionTimeout !== 'number') throw new Error('downloadFile: Invalid value for property `connectionTimeout`');
+  downloadFile(options: DownloadFileOptions): {
+    jobId: number;
+    promise: Promise<DownloadResult>;
+  } {
+    if (typeof options !== "object")
+      throw new Error("downloadFile: Invalid value for argument `options`");
+    if (typeof options.fromUrl !== "string")
+      throw new Error("downloadFile: Invalid value for property `fromUrl`");
+    if (typeof options.toFile !== "string")
+      throw new Error("downloadFile: Invalid value for property `toFile`");
+    if (options.headers && typeof options.headers !== "object")
+      throw new Error("downloadFile: Invalid value for property `headers`");
+    if (options.background && typeof options.background !== "boolean")
+      throw new Error("downloadFile: Invalid value for property `background`");
+    if (options.progressDivider && typeof options.progressDivider !== "number")
+      throw new Error(
+        "downloadFile: Invalid value for property `progressDivider`"
+      );
+    if (options.readTimeout && typeof options.readTimeout !== "number")
+      throw new Error("downloadFile: Invalid value for property `readTimeout`");
+    if (
+      options.connectionTimeout &&
+      typeof options.connectionTimeout !== "number"
+    )
+      throw new Error(
+        "downloadFile: Invalid value for property `connectionTimeout`"
+      );
 
     var jobId = getJobId();
-    var subscriptions = [];
+    var subscriptions: any[] = [];
 
     if (options.begin) {
-      subscriptions.push(NativeAppEventEmitter.addListener('DownloadBegin-' + jobId, options.begin));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "DownloadBegin-" + jobId,
+          options.begin
+        )
+      );
     }
 
     if (options.progress) {
-      subscriptions.push(NativeAppEventEmitter.addListener('DownloadProgress-' + jobId, options.progress));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "DownloadProgress-" + jobId,
+          options.progress
+        )
+      );
     }
 
     if (options.resumable) {
-      subscriptions.push(NativeAppEventEmitter.addListener('DownloadResumable-' + jobId, options.resumable));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "DownloadResumable-" + jobId,
+          options.resumable
+        )
+      );
     }
 
     var bridgeOptions = {
@@ -512,53 +626,85 @@ var RNFS = {
       background: !!options.background,
       progressDivider: options.progressDivider || 0,
       readTimeout: options.readTimeout || 15000,
-      connectionTimeout: options.connectionTimeout || 5000
+      connectionTimeout: options.connectionTimeout || 5000,
     };
 
     return {
       jobId,
-      promise: RNFSManager.downloadFile(bridgeOptions).then(res => {
-        subscriptions.forEach(sub => sub.remove());
-        return res;
-      })
-        .catch(e => {
-          return Promise.reject(e);
+      promise: RNFSManager.downloadFile(bridgeOptions)
+        .then((res: DownloadResult) => {
+          subscriptions.forEach((sub: any) => sub.remove());
+          return res;
         })
+        .catch((e: Error) => {
+          return Promise.reject(e);
+        }),
     };
   },
 
-  uploadFiles(options: UploadFileOptions): { jobId: number, promise: Promise<UploadResult> } {
+  uploadFiles(options: UploadFileOptions): {
+    jobId: number;
+    promise: Promise<UploadResult>;
+  } {
     if (!RNFSManager.uploadFiles) {
       return {
         jobId: -1,
-        promise: Promise.reject(new Error('`uploadFiles` is unsupported on this platform'))
+        promise: Promise.reject(
+          new Error("`uploadFiles` is unsupported on this platform")
+        ),
       };
     }
 
     var jobId = getJobId();
-    var subscriptions = [];
+    var subscriptions: any[] = [];
 
-    if (typeof options !== 'object') throw new Error('uploadFiles: Invalid value for argument `options`');
-    if (typeof options.toUrl !== 'string') throw new Error('uploadFiles: Invalid value for property `toUrl`');
-    if (!Array.isArray(options.files)) throw new Error('uploadFiles: Invalid value for property `files`');
-    if (options.headers && typeof options.headers !== 'object') throw new Error('uploadFiles: Invalid value for property `headers`');
-    if (options.fields && typeof options.fields !== 'object') throw new Error('uploadFiles: Invalid value for property `fields`');
-    if (options.method && typeof options.method !== 'string') throw new Error('uploadFiles: Invalid value for property `method`');
+    if (typeof options !== "object")
+      throw new Error("uploadFiles: Invalid value for argument `options`");
+    if (typeof options.toUrl !== "string")
+      throw new Error("uploadFiles: Invalid value for property `toUrl`");
+    if (!Array.isArray(options.files))
+      throw new Error("uploadFiles: Invalid value for property `files`");
+    if (options.headers && typeof options.headers !== "object")
+      throw new Error("uploadFiles: Invalid value for property `headers`");
+    if (options.fields && typeof options.fields !== "object")
+      throw new Error("uploadFiles: Invalid value for property `fields`");
+    if (options.method && typeof options.method !== "string")
+      throw new Error("uploadFiles: Invalid value for property `method`");
 
     if (options.begin) {
-      subscriptions.push(NativeAppEventEmitter.addListener('UploadBegin-' + jobId, options.begin));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener("UploadBegin-" + jobId, options.begin)
+      );
     }
     if (options.beginCallback && options.beginCallback instanceof Function) {
       // Deprecated
-      subscriptions.push(NativeAppEventEmitter.addListener('UploadBegin-' + jobId, options.beginCallback));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "UploadBegin-" + jobId,
+          options.beginCallback
+        )
+      );
     }
 
     if (options.progress) {
-      subscriptions.push(NativeAppEventEmitter.addListener('UploadProgress-' + jobId, options.progress));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "UploadProgress-" + jobId,
+          options.progress
+        )
+      );
     }
-    if (options.progressCallback && options.progressCallback instanceof Function) {
+    if (
+      options.progressCallback &&
+      options.progressCallback instanceof Function
+    ) {
       // Deprecated
-      subscriptions.push(NativeAppEventEmitter.addListener('UploadProgress-' + jobId, options.progressCallback));
+      subscriptions.push(
+        NativeAppEventEmitter.addListener(
+          "UploadProgress-" + jobId,
+          options.progressCallback
+        )
+      );
     }
 
     var bridgeOptions = {
@@ -567,28 +713,32 @@ var RNFS = {
       files: options.files,
       headers: options.headers || {},
       fields: options.fields || {},
-      method: options.method || 'POST'
+      method: options.method || "POST",
     };
 
     return {
       jobId,
-      promise: RNFSManager.uploadFiles(bridgeOptions).then(res => {
-        subscriptions.forEach(sub => sub.remove());
-        return res;
-      })
+      promise: RNFSManager.uploadFiles(bridgeOptions).then(
+        (res: UploadResult | null) => {
+          subscriptions.forEach((sub: any) => sub.remove());
+          return res as UploadResult;
+        }
+      ),
     };
   },
 
   touch(filepath: string, mtime?: Date, ctime?: Date): Promise<void> {
-    if (ctime && !(ctime instanceof Date)) throw new Error('touch: Invalid value for argument `ctime`');
-    if (mtime && !(mtime instanceof Date)) throw new Error('touch: Invalid value for argument `mtime`');
+    if (ctime && !(ctime instanceof Date))
+      throw new Error("touch: Invalid value for argument `ctime`");
+    if (mtime && !(mtime instanceof Date))
+      throw new Error("touch: Invalid value for argument `mtime`");
     var ctimeTime = 0;
     if (isIOS) {
-      ctimeTime = ctime && ctime.getTime();
+      ctimeTime = (ctime && ctime.getTime()) || 0;
     }
     return RNFSManager.touch(
       normalizeFilePath(filepath),
-      mtime && mtime.getTime(),
+      (mtime && mtime.getTime()) || 0,
       ctimeTime
     );
   },
@@ -606,7 +756,7 @@ var RNFS = {
   TemporaryDirectoryPath: RNFSManager.RNFSTemporaryDirectoryPath,
   LibraryDirectoryPath: RNFSManager.RNFSLibraryDirectoryPath,
   PicturesDirectoryPath: RNFSManager.RNFSPicturesDirectoryPath,
-  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys
+  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys,
 };
 
-module.exports = RNFS;
+export default RNFS;
