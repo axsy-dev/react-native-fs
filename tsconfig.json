@@ -2,6 +2,9 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     "rootDir": ".",
+    "paths": {
+      "react-native-fs": ["./src/index"]
+    },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "customConditions": ["react-native-strict-api"],
