@@ -136,7 +136,7 @@ function readFileGeneric(
   command: Function
 ) {
   var options = {
-    encoding: "utf8",
+    encoding: "utf8"
   };
 
   if (encodingOrOptions) {
@@ -181,7 +181,7 @@ function readDirGeneric(
       path: file.path,
       size: file.size,
       isFile: () => file.type === RNFSFileTypeRegular,
-      isDirectory: () => file.type === RNFSFileTypeDirectory,
+      isDirectory: () => file.type === RNFSFileTypeDirectory
     }));
   });
 }
@@ -291,8 +291,8 @@ var RNFS = {
 
   // Node style version (lowercase d). Returns just the names
   readdir(dirpath: string): Promise<string[]> {
-    return RNFS.readDir(normalizeFilePath(dirpath)).then((files) => {
-      return files.map((file) => file.name);
+    return RNFS.readDir(normalizeFilePath(dirpath)).then(files => {
+      return files.map(file => file.name);
     });
   },
 
@@ -319,7 +319,7 @@ var RNFS = {
         mode: result.mode,
         originalFilepath: result.originalFilepath,
         isFile: () => result.type === RNFSFileTypeRegular,
-        isDirectory: () => result.type === RNFSFileTypeDirectory,
+        isDirectory: () => result.type === RNFSFileTypeDirectory
       };
     });
   },
@@ -335,7 +335,7 @@ var RNFS = {
     encodingOrOptions?: any
   ): Promise<string> {
     var options = {
-      encoding: "utf8",
+      encoding: "utf8"
     };
 
     if (encodingOrOptions) {
@@ -458,7 +458,7 @@ var RNFS = {
     var b64;
 
     var options = {
-      encoding: "utf8",
+      encoding: "utf8"
     };
 
     if (encodingOrOptions) {
@@ -467,7 +467,7 @@ var RNFS = {
       } else if (typeof encodingOrOptions === "object") {
         options = {
           ...options,
-          ...encodingOrOptions,
+          ...encodingOrOptions
         };
       }
     }
@@ -497,7 +497,7 @@ var RNFS = {
     var b64;
 
     var options = {
-      encoding: "utf8",
+      encoding: "utf8"
     };
 
     if (encodingOrOptions) {
@@ -530,7 +530,7 @@ var RNFS = {
     var b64;
 
     var options = {
-      encoding: "utf8",
+      encoding: "utf8"
     };
 
     if (encodingOrOptions) {
@@ -626,7 +626,7 @@ var RNFS = {
       background: !!options.background,
       progressDivider: options.progressDivider || 0,
       readTimeout: options.readTimeout || 15000,
-      connectionTimeout: options.connectionTimeout || 5000,
+      connectionTimeout: options.connectionTimeout || 5000
     };
 
     return {
@@ -638,7 +638,7 @@ var RNFS = {
         })
         .catch((e: Error) => {
           return Promise.reject(e);
-        }),
+        })
     };
   },
 
@@ -651,7 +651,7 @@ var RNFS = {
         jobId: -1,
         promise: Promise.reject(
           new Error("`uploadFiles` is unsupported on this platform")
-        ),
+        )
       };
     }
 
@@ -713,7 +713,7 @@ var RNFS = {
       files: options.files,
       headers: options.headers || {},
       fields: options.fields || {},
-      method: options.method || "POST",
+      method: options.method || "POST"
     };
 
     return {
@@ -723,7 +723,7 @@ var RNFS = {
           subscriptions.forEach((sub: any) => sub.remove());
           return res as UploadResult;
         }
-      ),
+      )
     };
   },
 
@@ -756,7 +756,7 @@ var RNFS = {
   TemporaryDirectoryPath: RNFSManager.RNFSTemporaryDirectoryPath,
   LibraryDirectoryPath: RNFSManager.RNFSLibraryDirectoryPath,
   PicturesDirectoryPath: RNFSManager.RNFSPicturesDirectoryPath,
-  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys,
+  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys
 };
 
 export default RNFS;
