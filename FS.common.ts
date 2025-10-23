@@ -8,11 +8,11 @@ const isIOS = Platform.OS === "ios";
 const RNFSFileTypeRegular = RNFSManager.RNFSFileTypeRegular;
 const RNFSFileTypeDirectory = RNFSManager.RNFSFileTypeDirectory;
 
-let jobId = 0;
+let _jobId = 0;
 
 const getJobId = () => {
-  jobId += 1;
-  return jobId;
+  _jobId += 1;
+  return _jobId;
 };
 
 const normalizeFilePath = (path: string) =>
@@ -189,7 +189,7 @@ function readDirGeneric(
 var RNFS = {
   mkdir(filepath: string, options: MkdirOptions = {}): Promise<void> {
     return RNFSManager.mkdir(normalizeFilePath(filepath), options).then(
-      () => void 0
+      () => undefined
     );
   },
 
@@ -202,7 +202,7 @@ var RNFS = {
       normalizeFilePath(filepath),
       normalizeFilePath(destPath),
       options
-    ).then(() => void 0);
+    ).then(() => undefined);
   },
 
   copyFile(
@@ -214,7 +214,7 @@ var RNFS = {
       normalizeFilePath(filepath),
       normalizeFilePath(destPath),
       options
-    ).then(() => void 0);
+    ).then(() => undefined);
   },
 
   pathForBundle(bundleNamed: string): Promise<string> {
@@ -234,7 +234,9 @@ var RNFS = {
   },
 
   unlink(filepath: string): Promise<void> {
-    return RNFSManager.unlink(normalizeFilePath(filepath)).then(() => void 0);
+    return RNFSManager.unlink(normalizeFilePath(filepath)).then(
+      () => undefined
+    );
   },
 
   exists(filepath: string): Promise<boolean> {
@@ -405,7 +407,7 @@ var RNFS = {
     return RNFSManager.copyFileAssets(
       normalizeFilePath(filepath),
       normalizeFilePath(destPath)
-    ).then(() => void 0);
+    ).then(() => undefined);
   },
 
   // Android only
@@ -414,7 +416,7 @@ var RNFS = {
       throw new Error("copyFileRes is not available on this platform");
     }
     return RNFSManager.copyFileRes(filename, normalizeFilePath(destPath)).then(
-      () => void 0
+      () => undefined
     );
   },
 
@@ -486,7 +488,7 @@ var RNFS = {
       normalizeFilePath(filepath),
       b64,
       options
-    ).then(() => void 0);
+    ).then(() => undefined);
   },
 
   appendFile(
@@ -556,7 +558,7 @@ var RNFS = {
     }
 
     return RNFSManager.write(normalizeFilePath(filepath), b64, position).then(
-      () => void 0
+      () => undefined
     );
   },
 
