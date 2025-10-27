@@ -7,14 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		645644281EB8DAA100672408 /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = F1EB08BA1AFD0E6A008F8F2B /* NSArray+Map.m */; };
-		645644291EB8DAA100672408 /* RNFSManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F1E59BDE1ADD662800ACA28A /* RNFSManager.m */; };
-		6456442A1EB8DAA100672408 /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8BF740761C033A2E0057A1E7 /* Downloader.m */; };
-		6456442B1EB8DAA100672408 /* Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8BB364CB1CDA130000435A01 /* Uploader.m */; };
-		8BB364CC1CDA130000435A01 /* Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8BB364CB1CDA130000435A01 /* Uploader.m */; };
-		8BF740771C033A2E0057A1E7 /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 8BF740761C033A2E0057A1E7 /* Downloader.m */; };
-		F1E59BDF1ADD662800ACA28A /* RNFSManager.m in Sources */ = {isa = PBXBuildFile; fileRef = F1E59BDE1ADD662800ACA28A /* RNFSManager.m */; };
-		F1EB08BB1AFD0E6A008F8F2B /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = F1EB08BA1AFD0E6A008F8F2B /* NSArray+Map.m */; };
+		607C55EE2EAFAC3A001F6271 /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 607C55E72EAFAC3A001F6271 /* Downloader.m */; };
+		607C55EF2EAFAC3A001F6271 /* RNFSManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 607C55EB2EAFAC3A001F6271 /* RNFSManager.m */; };
+		607C55F02EAFAC3A001F6271 /* Uploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 607C55ED2EAFAC3A001F6271 /* Uploader.m */; };
+		607C55F12EAFAC3A001F6271 /* NSArray+Map.m in Sources */ = {isa = PBXBuildFile; fileRef = 607C55E92EAFAC3A001F6271 /* NSArray+Map.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,16 +35,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		607C55E62EAFAC3A001F6271 /* Downloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
+		607C55E72EAFAC3A001F6271 /* Downloader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
+		607C55E82EAFAC3A001F6271 /* NSArray+Map.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSArray+Map.h"; sourceTree = "<group>"; };
+		607C55E92EAFAC3A001F6271 /* NSArray+Map.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Map.m"; sourceTree = "<group>"; };
+		607C55EA2EAFAC3A001F6271 /* RNFSManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RNFSManager.h; sourceTree = "<group>"; };
+		607C55EB2EAFAC3A001F6271 /* RNFSManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNFSManager.m; sourceTree = "<group>"; };
+		607C55EC2EAFAC3A001F6271 /* Uploader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Uploader.h; sourceTree = "<group>"; };
+		607C55ED2EAFAC3A001F6271 /* Uploader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Uploader.m; sourceTree = "<group>"; };
 		6456441F1EB8DA9100672408 /* libRNFS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNFS.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		8BB364CA1CDA130000435A01 /* Uploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Uploader.h; sourceTree = "<group>"; };
-		8BB364CB1CDA130000435A01 /* Uploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Uploader.m; sourceTree = "<group>"; };
-		8BF740751C033A2E0057A1E7 /* Downloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
-		8BF740761C033A2E0057A1E7 /* Downloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
 		F12AFB9B1ADAF8F800E0535D /* libRNFS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNFS.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		F1E59BDD1ADD662800ACA28A /* RNFSManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNFSManager.h; sourceTree = "<group>"; };
-		F1E59BDE1ADD662800ACA28A /* RNFSManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNFSManager.m; sourceTree = "<group>"; };
-		F1EB08B91AFD0E6A008F8F2B /* NSArray+Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Map.h"; sourceTree = "<group>"; };
-		F1EB08BA1AFD0E6A008F8F2B /* NSArray+Map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Map.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,14 +68,14 @@
 		F12AFB921ADAF8F800E0535D = {
 			isa = PBXGroup;
 			children = (
-				F1EB08B91AFD0E6A008F8F2B /* NSArray+Map.h */,
-				F1EB08BA1AFD0E6A008F8F2B /* NSArray+Map.m */,
-				F1E59BDD1ADD662800ACA28A /* RNFSManager.h */,
-				F1E59BDE1ADD662800ACA28A /* RNFSManager.m */,
-				8BF740751C033A2E0057A1E7 /* Downloader.h */,
-				8BF740761C033A2E0057A1E7 /* Downloader.m */,
-				8BB364CA1CDA130000435A01 /* Uploader.h */,
-				8BB364CB1CDA130000435A01 /* Uploader.m */,
+				607C55E62EAFAC3A001F6271 /* Downloader.h */,
+				607C55E72EAFAC3A001F6271 /* Downloader.m */,
+				607C55E82EAFAC3A001F6271 /* NSArray+Map.h */,
+				607C55E92EAFAC3A001F6271 /* NSArray+Map.m */,
+				607C55EA2EAFAC3A001F6271 /* RNFSManager.h */,
+				607C55EB2EAFAC3A001F6271 /* RNFSManager.m */,
+				607C55EC2EAFAC3A001F6271 /* Uploader.h */,
+				607C55ED2EAFAC3A001F6271 /* Uploader.m */,
 				F12AFB9C1ADAF8F800E0535D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -153,6 +149,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = F12AFB921ADAF8F800E0535D;
@@ -171,10 +168,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				645644281EB8DAA100672408 /* NSArray+Map.m in Sources */,
-				645644291EB8DAA100672408 /* RNFSManager.m in Sources */,
-				6456442A1EB8DAA100672408 /* Downloader.m in Sources */,
-				6456442B1EB8DAA100672408 /* Uploader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -182,10 +175,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F1E59BDF1ADD662800ACA28A /* RNFSManager.m in Sources */,
-				8BB364CC1CDA130000435A01 /* Uploader.m in Sources */,
-				F1EB08BB1AFD0E6A008F8F2B /* NSArray+Map.m in Sources */,
-				8BF740771C033A2E0057A1E7 /* Downloader.m in Sources */,
+				607C55EE2EAFAC3A001F6271 /* Downloader.m in Sources */,
+				607C55EF2EAFAC3A001F6271 /* RNFSManager.m in Sources */,
+				607C55F02EAFAC3A001F6271 /* Uploader.m in Sources */,
+				607C55F12EAFAC3A001F6271 /* NSArray+Map.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +339,7 @@
 				645644261EB8DA9100672408 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F12AFB961ADAF8F800E0535D /* Build configuration list for PBXProject "RNFS" */ = {
 			isa = XCConfigurationList;
