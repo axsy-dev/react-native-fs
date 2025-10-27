@@ -1,6 +1,6 @@
 import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
 import * as base64 from "base-64";
-import * as utf8 from "utf8";
+import utf8 from "./utf8";
 
 const RNFSManager = NativeModules.RNFSManager;
 const isIOS = Platform.OS === "ios";

@@ -1,6 +1,6 @@
 {
   "name": "react-native-fs",
-  "version": "2.13.4",
+  "version": "2.16.13",
   "description": "Native filesystem access for react-native",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -58,8 +58,7 @@
   "author": "Johannes Lumpe <johannes@lum.pe> (https://github.com/johanneslumpe)",
   "license": "MIT",
   "dependencies": {
-    "base-64": "^1.0.0",
-    "utf8": "^3.0.0"
+    "base-64": "^0.1.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.8.1",
