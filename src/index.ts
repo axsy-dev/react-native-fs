@@ -1,8 +1,13 @@
 import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
 import * as base64 from "base-64";
 import utf8 from "./utf8";
+import { electronAPI } from "./electron/renderer";
+import type { FileOptions, MkdirOptions, ReadDirItem } from "./types";
 
-const RNFSManager = NativeModules.RNFSManager;
+const RNFSManager = Platform.select({
+  web: electronAPI,
+  default: NativeModules.RNFSManager
+});
 const isIOS = Platform.OS === "ios";
 
 const RNFSFileTypeRegular = RNFSManager.RNFSFileTypeRegular;
@@ -17,25 +22,6 @@ const getJobId = () => {
 
 const normalizeFilePath = (path: string) =>
   path.startsWith("file://") ? path.slice(7) : path;
-
-type MkdirOptions = {
-  NSURLIsExcludedFromBackupKey?: boolean; // iOS only
-  NSFileProtectionKey?: string; // IOS only
-};
-
-type FileOptions = {
-  NSFileProtectionKey?: string; // IOS only
-};
-
-type ReadDirItem = {
-  ctime: Date | null | undefined; // The creation date of the file (iOS only)
-  mtime: Date | null | undefined; // The last modified date of the file
-  name: string; // The name of the item
-  path: string; // The absolute path to the item
-  size: string; // Size in bytes
-  isFile: () => boolean; // Is the file just a file?
-  isDirectory: () => boolean; // Is the file a directory?
-};
 
 type StatResult = {
   name: string | null | undefined; // The name of the item TODO: why is this not documented?
@@ -758,7 +744,14 @@ var RNFS = {
   TemporaryDirectoryPath: RNFSManager.RNFSTemporaryDirectoryPath,
   LibraryDirectoryPath: RNFSManager.RNFSLibraryDirectoryPath,
   PicturesDirectoryPath: RNFSManager.RNFSPicturesDirectoryPath,
-  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys
+  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys,
+
+  Separator: Platform.select({
+    ios: "/",
+    android: "/",
+    windows: "\\",
+    web: RNFSManager.RNFSSeparator
+  })
 };
 
 export default RNFS;

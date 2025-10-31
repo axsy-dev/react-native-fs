@@ -1,2 +1,5 @@
 eslint.config.mjs
 README.md
+lib
+.yarn
+*.md
