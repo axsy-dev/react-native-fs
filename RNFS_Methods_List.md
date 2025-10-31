@@ -19,12 +19,12 @@ This document lists all methods and properties on `RNFS` (react-native-fs) found
 1. ~~**exists(filePath: string)** - Check if a file or directory exists~~
 2. ~~**readFile(filepath: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Read file contents~~
 3. ~~**writeFile(filepath: string, contents: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Write contents to a file~~
-4. **appendFile(filepath: string, contents: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Append contents to a file
-5. **readFileAssets(filepath: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Read file from assets
+4. ~**appendFile(filepath: string, contents: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Append contents to a file~
+5. ~~**readFileAssets(filepath: string, encoding?: 'utf8' | 'ascii' | 'base64')** - Read file from assets~~
 6. ~~**mkdir(dirPath: string, options?: object)** - Create a directory~~
 7. ~~**unlink(filepath: string)** - Delete a file or directory~~
 8. ~~**readDir(dirPath: string)** - Read directory contents~~
-9. **stat(filepath: string)** - Get file/directory statistics
+9. ~~**stat(filepath: string)** - Get file/directory statistics~~
 10. ~~**copyFile(sourcePath: string, destPath: string)** - Copy a file~~
 11. **downloadFile(options: object)** - Download a file from a URL
 12. **uploadFiles(options: object)** - Upload files to a server

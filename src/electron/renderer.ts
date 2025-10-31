@@ -32,6 +32,8 @@ export interface FSApi {
     RNFSExternalStorageDirectoryPath: string;
     RNFSExternalCachesDirectoryPath: string;
   }>;
+  appendFile: (filepath: string, contents: string) => Promise<void>;
+  stat: (filepath: string) => Promise<Stat>;
 }
 
 class RNFSManager implements Omit<FSApi, "initPaths"> {
@@ -45,6 +47,8 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
   public RNFSExternalDirectoryPath: string = "";
   public RNFSExternalStorageDirectoryPath: string = "";
   public RNFSExternalCachesDirectoryPath: string = "";
+  public readFilesAssets = null;
+  public readFileRes = null;
 
   constructor() {
     this.init();
@@ -66,7 +70,7 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
   }
 
   public async mkdir(path: string, options: MkdirOptions): Promise<void> {
-    window.fsapi.mkdir(path, options);
+    return await window.fsapi.mkdir(path, options);
   }
 
   public async moveFile(
@@ -74,7 +78,7 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
     destPath: string,
     options: FileOptions
   ): Promise<void> {
-    window.fsapi.moveFile(filepath, destPath, options);
+    return await window.fsapi.moveFile(filepath, destPath, options);
   }
 
   public async copyFile(
@@ -82,22 +86,22 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
     destPath: string,
     options: FileOptions
   ): Promise<void> {
-    window.fsapi.copyFile(filepath, destPath, options);
+    return await window.fsapi.copyFile(filepath, destPath, options);
   }
 
   public async unlink(filepath: string): Promise<void> {
-    window.fsapi.unlink(filepath);
+    return await window.fsapi.unlink(filepath);
   }
 
   public async exists(filepath: string): Promise<boolean> {
-    return window.fsapi.exists(filepath);
+    return await window.fsapi.exists(filepath);
   }
 
   public async readFile(
     filepath: string,
     options: FileOptions
   ): Promise<string> {
-    return window.fsapi.readFile(filepath, options);
+    return await window.fsapi.readFile(filepath, options);
   }
 
   public async writeFile(
@@ -105,11 +109,19 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
     contents: string,
     options: ObjectEncodingOptions
   ): Promise<void> {
-    window.fsapi.writeFile(filepath, contents, options);
+    return await window.fsapi.writeFile(filepath, contents, options);
   }
 
   public async readDir(dirPath: string): Promise<ReadDirEntry[]> {
     return await window.fsapi.readDir(dirPath);
+  }
+
+  public async appendFile(filepath: string, contents: string): Promise<void> {
+    return await window.fsapi.appendFile(filepath, contents);
+  }
+
+  public async stat(filepath: string): Promise<Stat> {
+    return await window.fsapi.stat(filepath);
   }
 }
 

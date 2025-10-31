@@ -23,7 +23,7 @@ const getJobId = () => {
 const normalizeFilePath = (path: string) =>
   path.startsWith("file://") ? path.slice(7) : path;
 
-type StatResult = {
+type (StatResult) = {
   name: string | null | undefined; // The name of the item TODO: why is this not documented?
   path: string; // The absolute path to the item
   size: string; // Size in bytes

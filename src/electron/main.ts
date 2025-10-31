@@ -93,19 +93,35 @@ async function readDir(
   const entries: ReadDirEntry[] = [];
 
   for await (const dirEntry of dirEntries) {
-    const stat = await fs.stat(path.join(dirPath, dirEntry.name));
-
-    entries.push({
-      name: dirEntry.name,
-      path: path.join(dirPath, dirEntry.name),
-      ctime: stat.ctimeMs,
-      mtime: stat.mtimeMs,
-      size: stat.size,
-      type: stat.isFile() ? RNFSFileTypeRegular : RNFSFileTypeDirectory
-    });
+    const result = await getStat(path.join(dirPath, dirEntry.name));
+    entries.push(result);
   }
 
   return entries;
+}
+
+async function getStat(filepath: string): Promise<ReadDirEntry> {
+  const stat = await fs.stat(filepath);
+  return {
+    name: path.basename(filepath),
+    path: filepath,
+    ctime: stat.ctimeMs,
+    mtime: stat.mtimeMs,
+    size: stat.size,
+    type: stat.isFile() ? RNFSFileTypeRegular : RNFSFileTypeDirectory
+  };
+}
+
+async function appendFile(
+  _event: IpcMainInvokeEvent,
+  filepath: string,
+  contents: string
+) {
+  await fs.appendFile(filepath, contents, "base64");
+}
+
+async function stat(_event: IpcMainInvokeEvent, filepath: string) {
+  return await getStat(filepath);
 }
 
 export const filesystem = {
@@ -118,7 +134,9 @@ export const filesystem = {
       exists,
       readFile,
       writeFile,
-      readDir
+      readDir,
+      appendFile,
+      stat
     };
   },
   main: {
