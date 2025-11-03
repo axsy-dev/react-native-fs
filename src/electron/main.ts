@@ -10,10 +10,10 @@ const RNFSFileTypeDirectory = 1;
 
 async function mkdir(
   _event: IpcMainInvokeEvent,
-  path: string,
+  dirpath: string,
   _options: MkdirOptions
 ) {
-  await fs.mkdir(path);
+  await fs.mkdir(dirpath);
 }
 
 async function moveFile(
@@ -101,14 +101,14 @@ async function readDir(
 }
 
 async function getStat(filepath: string): Promise<ReadDirEntry> {
-  const stat = await fs.stat(filepath);
+  const fileStat = await fs.stat(filepath);
   return {
     name: path.basename(filepath),
     path: filepath,
-    ctime: stat.ctimeMs,
-    mtime: stat.mtimeMs,
-    size: stat.size,
-    type: stat.isFile() ? RNFSFileTypeRegular : RNFSFileTypeDirectory
+    ctime: fileStat.ctimeMs,
+    mtime: fileStat.mtimeMs,
+    size: fileStat.size,
+    type: fileStat.isFile() ? RNFSFileTypeRegular : RNFSFileTypeDirectory
   };
 }
 
