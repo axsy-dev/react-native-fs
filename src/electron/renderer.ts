@@ -1,4 +1,10 @@
-import type { MkdirOptions, FileOptions, ReadDirEntry } from "../types";
+import type {
+  MkdirOptions,
+  FileOptions,
+  ReadDirEntry,
+  DownloadBridgeOptions,
+  DownloadResult
+} from "../types";
 import type { ObjectEncodingOptions } from "node:fs";
 
 export interface FSApi {
@@ -33,7 +39,8 @@ export interface FSApi {
     RNFSExternalCachesDirectoryPath: string;
   }>;
   appendFile: (filepath: string, contents: string) => Promise<void>;
-  stat: (filepath: string) => Promise<Stat>;
+  stat: (filepath: string) => Promise<ReadDirEntry>;
+  downloadFile: (options: DownloadBridgeOptions) => Promise<DownloadResult>;
 }
 
 class RNFSManager implements Omit<FSApi, "initPaths"> {
@@ -52,6 +59,12 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
 
   constructor() {
     this.init();
+  }
+
+  public async downloadFile(
+    options: DownloadBridgeOptions
+  ): Promise<DownloadResult> {
+    return window.fsapi.downloadFile(options);
   }
 
   private async init() {

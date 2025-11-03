@@ -1,5 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { FileOptions, MkdirOptions } from "../types";
+import type {
+  DownloadBridgeOptions,
+  FileOptions,
+  MkdirOptions
+} from "../types";
 import type { ObjectEncodingOptions } from "node:fs";
 import type { FSApi } from "./renderer";
 
@@ -63,6 +67,9 @@ const api: FSApi = {
   },
   stat: async (filepath: string) => {
     return await ipcRenderer.invoke("axsy:fs:stat", filepath);
+  },
+  downloadFile: async (options: DownloadBridgeOptions) => {
+    return await ipcRenderer.invoke("axsy:fs:downloadFile", options);
   }
 };
 

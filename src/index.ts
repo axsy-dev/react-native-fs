@@ -2,7 +2,18 @@ import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
 import * as base64 from "base-64";
 import utf8 from "./utf8";
 import { electronAPI } from "./electron/renderer";
-import type { FileOptions, MkdirOptions, ReadDirItem } from "./types";
+import type {
+  FileOptions,
+  MkdirOptions,
+  ReadDirItem,
+  DownloadResult,
+  StatResult,
+  FSInfoResult,
+  DownloadFileOptions,
+  DownloadBridgeOptions,
+  UploadFileOptions,
+  UploadResult
+} from "./types";
 
 const RNFSManager = Platform.select({
   web: electronAPI,
@@ -22,96 +33,6 @@ const getJobId = () => {
 
 const normalizeFilePath = (path: string) =>
   path.startsWith("file://") ? path.slice(7) : path;
-
-type (StatResult) = {
-  name: string | null | undefined; // The name of the item TODO: why is this not documented?
-  path: string; // The absolute path to the item
-  size: string; // Size in bytes
-  mode: number; // UNIX file mode
-  ctime: number; // Created date
-  mtime: number; // Last modified date
-  originalFilepath: string; // In case of content uri this is the pointed file path, otherwise is the same as path
-  isFile: () => boolean; // Is the file just a file?
-  isDirectory: () => boolean; // Is the file a directory?
-};
-
-type Headers = { [name: string]: string };
-type Fields = { [name: string]: string };
-
-type DownloadFileOptions = {
-  fromUrl: string; // URL to download file from
-  toFile: string; // Local filesystem path to save the file to
-  headers?: Headers; // An object of headers to be passed to the server
-  background?: boolean; // Continue the download in the background after the app terminates (iOS only)
-  discretionary?: boolean; // Allow the OS to control the timing and speed of the download to improve perceived performance  (iOS only)
-  cacheable?: boolean; // Whether the download can be stored in the shared NSURLCache (iOS only)
-  progressDivider?: number;
-  begin?: (res: DownloadBeginCallbackResult) => void;
-  progress?: (res: DownloadProgressCallbackResult) => void;
-  resumable?: () => void; // only supported on iOS yet
-  connectionTimeout?: number; // only supported on Android yet
-  readTimeout?: number; // supported on Android and iOS
-};
-
-type DownloadBeginCallbackResult = {
-  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  statusCode: number; // The HTTP status code
-  contentLength: number; // The total size in bytes of the download resource
-  headers: Headers; // The HTTP response headers from the server
-};
-
-type DownloadProgressCallbackResult = {
-  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  contentLength: number; // The total size in bytes of the download resource
-  bytesWritten: number; // The number of bytes written to the file so far
-};
-
-type DownloadResult = {
-  jobId: number; // The download job ID, required if one wishes to cancel the download. See `stopDownload`.
-  statusCode: number; // The HTTP status code
-  bytesWritten: number; // The number of bytes written to the file
-};
-
-type UploadFileOptions = {
-  toUrl: string; // URL to upload file to
-  files: UploadFileItem[]; // An array of objects with the file information to be uploaded.
-  headers?: Headers; // An object of headers to be passed to the server
-  fields?: Fields; // An object of fields to be passed to the server
-  method?: string; // Default is 'POST', supports 'POST' and 'PUT'
-  beginCallback?: (res: UploadBeginCallbackResult) => void; // deprecated
-  progressCallback?: (res: UploadProgressCallbackResult) => void; // deprecated
-  begin?: (res: UploadBeginCallbackResult) => void;
-  progress?: (res: UploadProgressCallbackResult) => void;
-};
-
-type UploadFileItem = {
-  name: string; // Name of the file, if not defined then filename is used
-  filename: string; // Name of file
-  filepath: string; // Path to file
-  filetype: string; // The mimetype of the file to be uploaded, if not defined it will get mimetype from `filepath` extension
-};
-
-type UploadBeginCallbackResult = {
-  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
-};
-
-type UploadProgressCallbackResult = {
-  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
-  totalBytesExpectedToSend: number; // The total number of bytes that will be sent to the server
-  totalBytesSent: number; // The number of bytes sent to the server
-};
-
-type UploadResult = {
-  jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
-  statusCode: number; // The HTTP status code
-  headers: Headers; // The HTTP response headers from the server
-  body: string; // The HTTP response body
-};
-
-type FSInfoResult = {
-  totalSpace: number; // The total amount of storage space on the device (in bytes).
-  freeSpace: number; // The amount of available storage space on the device (in bytes).
-};
 
 /**
  * Generic function used by readFile and readFileAssets
@@ -606,7 +527,7 @@ var RNFS = {
       );
     }
 
-    var bridgeOptions = {
+    var bridgeOptions: DownloadBridgeOptions = {
       jobId: jobId,
       fromUrl: options.fromUrl,
       toFile: normalizeFilePath(options.toFile),
