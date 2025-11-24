@@ -133,7 +133,7 @@ class RNFSManager implements Omit<FSApi, "initPaths"> {
     return await window.fsapi.appendFile(filepath, contents);
   }
 
-  public async stat(filepath: string): Promise<Stat> {
+  public async stat(filepath: string): Promise<ReadDirEntry> {
     return await window.fsapi.stat(filepath);
   }
 }
