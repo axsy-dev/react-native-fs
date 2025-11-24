@@ -4,6 +4,7 @@
   "description": "Native filesystem access for react-native",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "source": "./src/index.ts",
