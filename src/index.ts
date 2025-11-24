@@ -12,6 +12,7 @@ import type {
   DownloadFileOptions,
   DownloadBridgeOptions,
   UploadFileOptions,
+  UploadBridgeOptions,
   UploadResult
 } from "./types";
 
@@ -616,7 +617,7 @@ var RNFS = {
       );
     }
 
-    var bridgeOptions = {
+    var bridgeOptions: UploadBridgeOptions = {
       jobId: jobId,
       toUrl: options.toUrl,
       files: options.files,

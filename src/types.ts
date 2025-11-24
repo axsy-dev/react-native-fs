@@ -115,6 +115,15 @@ export type UploadProgressCallbackResult = {
   totalBytesSent: number; // The number of bytes sent to the server
 };
 
+export type UploadBridgeOptions = {
+  jobId: number;
+  toUrl: string;
+  files: UploadFileItem[];
+  headers: Headers;
+  fields: Fields;
+  method: string;
+};
+
 export type UploadResult = {
   jobId: number; // The upload job ID, required if one wishes to cancel the upload. See `stopUpload`.
   statusCode: number; // The HTTP status code
