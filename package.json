@@ -12,7 +12,7 @@
     "./package.json": "./package.json",
     "./preload": {
       "source": "./src/electron/preload.ts",
-      "types": "./lib/typescript/src/electron.d.ts",
+      "types": "./lib/typescript/src/electron/preload.d.ts",
       "default": "./lib/module/electron/preload.js"
     },
     "./main": "./lib/module/electron/main"
