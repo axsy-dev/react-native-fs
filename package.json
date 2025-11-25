@@ -15,7 +15,11 @@
       "types": "./lib/typescript/src/electron/preload.d.ts",
       "default": "./lib/module/electron/preload.js"
     },
-    "./main": "./lib/module/electron/main"
+    "./main": {
+      "source": "./src/electron/main.ts",
+      "types": "./lib/typescript/src/electron/main.d.ts",
+      "default": "./lib/module/electron/main.js"
+    }
   },
   "files": [
     "src",
