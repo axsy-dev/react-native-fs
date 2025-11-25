@@ -11,7 +11,9 @@
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./preload": "./lib/module/electron/preload",
+    "./main": "./lib/module/electron/main"
   },
   "files": [
     "src",
@@ -39,6 +41,7 @@
     "format": "prettier --check .",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "check": "yarn run lint && yarn run typecheck && yarn run format",
+    "build": "yarn run prepare",
     "prepare": "del-cli lib && bob build"
   },
   "repository": {
