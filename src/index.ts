@@ -16,6 +16,8 @@ import type {
   UploadResult
 } from "./types";
 
+export * from "./types";
+
 const RNFSManager = Platform.select({
   web: electronAPI,
   default: NativeModules.RNFSManager
