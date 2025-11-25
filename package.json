@@ -2,8 +2,6 @@
   "name": "react-native-fs",
   "version": "2.16.13",
   "description": "Native filesystem access for react-native",
-  "main": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
@@ -12,7 +10,11 @@
       "default": "./lib/module/index.js"
     },
     "./package.json": "./package.json",
-    "./preload": "./lib/module/electron/preload",
+    "./preload": {
+      "source": "./src/electron/preload.ts",
+      "types": "./lib/typescript/src/electron.d.ts",
+      "default": "./lib/module/electron/preload.js"
+    },
     "./main": "./lib/module/electron/main"
   },
   "files": [
