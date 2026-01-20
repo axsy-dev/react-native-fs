@@ -224,6 +224,20 @@ export const filesystem = {
         ipcMain.handle(`axsy:fs:${key}`, fn);
       }
       ipcMain.handle("axsy:fs:initPaths", initPaths);
+
+      // Synchronous handler for preload script to get paths at startup
+      ipcMain.on("axsy:fs:initPathsSync", event => {
+        event.returnValue = {
+          RNFSSeparator: path.sep,
+          RNFSDocumentDirectoryPath: app.getPath("userData"),
+          RNFSTemporaryDirectoryPath: app.getPath("temp"),
+          RNFSPicturesDirectoryPath: app.getPath("pictures"),
+          RNFSDownloadDirectoryPath: app.getPath("downloads"),
+          RNFSExternalDirectoryPath: null,
+          RNFSExternalStorageDirectoryPath: null,
+          RNFSExternalCachesDirectoryPath: null
+        };
+      });
     }
   }
 };

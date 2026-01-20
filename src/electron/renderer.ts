@@ -7,6 +7,17 @@ import type {
 } from "../types";
 import type { ObjectEncodingOptions } from "node:fs";
 
+export interface FSPaths {
+  RNFSSeparator: string;
+  RNFSDocumentDirectoryPath: string;
+  RNFSTemporaryDirectoryPath: string;
+  RNFSPicturesDirectoryPath: string;
+  RNFSDownloadDirectoryPath: string;
+  RNFSExternalDirectoryPath: string | null;
+  RNFSExternalStorageDirectoryPath: string | null;
+  RNFSExternalCachesDirectoryPath: string | null;
+}
+
 export interface FSApi {
   mkdir: (path: string, options: MkdirOptions) => Promise<void>;
   moveFile: (
@@ -28,58 +39,47 @@ export interface FSApi {
     options: ObjectEncodingOptions
   ) => Promise<void>;
   readDir: (dirPath: string) => Promise<ReadDirEntry[]>;
-  initPaths: () => Promise<{
-    RNFSSeparator: string;
-    RNFSDocumentDirectoryPath: string;
-    RNFSTemporaryDirectoryPath: string;
-    RNFSPicturesDirectoryPath: string;
-    RNFSDownloadDirectoryPath: string;
-    RNFSExternalDirectoryPath: string;
-    RNFSExternalStorageDirectoryPath: string;
-    RNFSExternalCachesDirectoryPath: string;
-  }>;
   appendFile: (filepath: string, contents: string) => Promise<void>;
   stat: (filepath: string) => Promise<ReadDirEntry>;
   downloadFile: (options: DownloadBridgeOptions) => Promise<DownloadResult>;
 }
 
-class RNFSManager implements Omit<FSApi, "initPaths"> {
+class RNFSManager implements FSApi {
   public RNFSFileTypeRegular = 0;
   public RNFSFileTypeDirectory = 1;
-  public RNFSDocumentDirectoryPath: string = "";
-  public RNFSSeparator: string = "/";
-  public RNFSTemporaryDirectoryPath: string = "";
-  public RNFSPicturesDirectoryPath: string = "";
-  public RNFSDownloadDirectoryPath: string = "";
-  public RNFSExternalDirectoryPath: string = "";
-  public RNFSExternalStorageDirectoryPath: string = "";
-  public RNFSExternalCachesDirectoryPath: string = "";
   public readFilesAssets = null;
   public readFileRes = null;
 
-  constructor() {
-    this.init();
+  // Paths are loaded synchronously from window.fspaths (set by preload script)
+  public get RNFSDocumentDirectoryPath(): string {
+    return window.fspaths.RNFSDocumentDirectoryPath;
+  }
+  public get RNFSSeparator(): string {
+    return window.fspaths.RNFSSeparator;
+  }
+  public get RNFSTemporaryDirectoryPath(): string {
+    return window.fspaths.RNFSTemporaryDirectoryPath;
+  }
+  public get RNFSPicturesDirectoryPath(): string {
+    return window.fspaths.RNFSPicturesDirectoryPath;
+  }
+  public get RNFSDownloadDirectoryPath(): string {
+    return window.fspaths.RNFSDownloadDirectoryPath;
+  }
+  public get RNFSExternalDirectoryPath(): string | null {
+    return window.fspaths.RNFSExternalDirectoryPath;
+  }
+  public get RNFSExternalStorageDirectoryPath(): string | null {
+    return window.fspaths.RNFSExternalStorageDirectoryPath;
+  }
+  public get RNFSExternalCachesDirectoryPath(): string | null {
+    return window.fspaths.RNFSExternalCachesDirectoryPath;
   }
 
   public async downloadFile(
     options: DownloadBridgeOptions
   ): Promise<DownloadResult> {
     return window.fsapi.downloadFile(options);
-  }
-
-  private async init() {
-    const paths = await window.fsapi.initPaths();
-
-    this.RNFSDocumentDirectoryPath = paths.RNFSDocumentDirectoryPath;
-    this.RNFSSeparator = paths.RNFSSeparator;
-    this.RNFSTemporaryDirectoryPath = paths.RNFSTemporaryDirectoryPath;
-    this.RNFSPicturesDirectoryPath = paths.RNFSPicturesDirectoryPath;
-    this.RNFSDownloadDirectoryPath = paths.RNFSDownloadDirectoryPath;
-    this.RNFSExternalDirectoryPath = paths.RNFSExternalDirectoryPath;
-    this.RNFSExternalStorageDirectoryPath =
-      paths.RNFSExternalStorageDirectoryPath;
-    this.RNFSExternalCachesDirectoryPath =
-      paths.RNFSExternalCachesDirectoryPath;
   }
 
   public async mkdir(path: string, options: MkdirOptions): Promise<void> {

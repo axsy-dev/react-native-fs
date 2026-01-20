@@ -5,7 +5,11 @@ import type {
   MkdirOptions
 } from "../types";
 import type { ObjectEncodingOptions } from "node:fs";
-import type { FSApi } from "./renderer";
+import type { FSApi, FSPaths } from "./renderer";
+
+// Get paths synchronously at preload time - this blocks until main responds
+// but ensures paths are available immediately when renderer starts
+const paths: FSPaths = ipcRenderer.sendSync("axsy:fs:initPathsSync");
 
 const api: FSApi = {
   mkdir: async (path: string, options: MkdirOptions) => {
@@ -56,9 +60,6 @@ const api: FSApi = {
       options
     );
   },
-  initPaths: async () => {
-    return await ipcRenderer.invoke("axsy:fs:initPaths");
-  },
   readDir: async (dirPath: string) => {
     return await ipcRenderer.invoke("axsy:fs:readDir", dirPath);
   },
@@ -77,6 +78,7 @@ export const filesystem = {
   preload: {
     init() {
       contextBridge.exposeInMainWorld("fsapi", api);
+      contextBridge.exposeInMainWorld("fspaths", paths);
     }
   }
 };
