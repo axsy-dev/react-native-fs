@@ -18,7 +18,11 @@ async function mkdir(
   dirpath: string,
   _options: MkdirOptions
 ) {
-  await fs.mkdir(dirpath);
+  try {
+    await fs.mkdir(dirpath);
+  } catch (e) {
+    // swallow error
+  }
 }
 
 async function moveFile(
@@ -40,7 +44,11 @@ async function copyFile(
 }
 
 async function unlink(_event: IpcMainInvokeEvent, filepath: string) {
-  await fs.unlink(filepath);
+  try {
+    await fs.unlink(filepath);
+  } catch (e) {
+    // swallow error
+  }
 }
 
 async function exists(
