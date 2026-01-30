@@ -1,6 +1,7 @@
 import { ipcMain, app } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
+import os from "node:os";
 import type {
   DownloadBridgeOptions,
   FileOptions,
@@ -210,6 +211,14 @@ async function _streamFile(
   }
 }
 
+async function getFSInfo(_event: IpcMainInvokeEvent) {
+  const st = await fs.statfs(os.homedir());
+  return {
+    freeSpace: st.blocks * st.bsize,
+    totalSpace: st.bfree * st.bsize
+  };
+}
+
 export const filesystem = {
   get api() {
     return {
@@ -223,7 +232,8 @@ export const filesystem = {
       readDir,
       appendFile,
       stat,
-      downloadFile
+      downloadFile,
+      getFSInfo
     };
   },
   main: {

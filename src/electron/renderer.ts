@@ -3,7 +3,8 @@ import type {
   FileOptions,
   ReadDirEntry,
   DownloadBridgeOptions,
-  DownloadResult
+  DownloadResult,
+  FSInfoResult
 } from "../types";
 import type { ObjectEncodingOptions } from "node:fs";
 
@@ -42,6 +43,7 @@ export interface FSApi {
   appendFile: (filepath: string, contents: string) => Promise<void>;
   stat: (filepath: string) => Promise<ReadDirEntry>;
   downloadFile: (options: DownloadBridgeOptions) => Promise<DownloadResult>;
+  getFSInfo: () => Promise<FSInfoResult>;
 }
 
 class RNFSManager implements FSApi {
@@ -135,6 +137,9 @@ class RNFSManager implements FSApi {
 
   public async stat(filepath: string): Promise<ReadDirEntry> {
     return await window.fsapi.stat(filepath);
+  }
+  public async getFSInfo(): Promise<FSInfoResult> {
+    return await window.fsapi.getFSInfo();
   }
 }
 

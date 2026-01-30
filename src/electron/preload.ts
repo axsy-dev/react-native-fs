@@ -71,6 +71,9 @@ const api: FSApi = {
   },
   downloadFile: async (options: DownloadBridgeOptions) => {
     return await ipcRenderer.invoke("axsy:fs:downloadFile", options);
+  },
+  getFSInfo: async () => {
+    return await ipcRenderer.invoke("axsy:fs:getFSInfo");
   }
 };
 
