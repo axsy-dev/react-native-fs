@@ -666,6 +666,9 @@ var RNFS = {
   get MainBundlePath() {
     return RNFSManager.RNFSMainBundlePath;
   },
+  get ResourcesPath() {
+    return RNFSManager.RNFSResourcesPath;
+  },
   get CachesDirectoryPath() {
     return RNFSManager.RNFSCachesDirectoryPath;
   },

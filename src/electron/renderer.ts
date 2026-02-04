@@ -17,6 +17,8 @@ export interface FSPaths {
   RNFSExternalDirectoryPath: string | null;
   RNFSExternalStorageDirectoryPath: string | null;
   RNFSExternalCachesDirectoryPath: string | null;
+  RNFSResourcesPath: string;
+  RNFSMainBundlePath: string;
 }
 
 export interface FSApi {
@@ -76,6 +78,12 @@ class RNFSManager implements FSApi {
   }
   public get RNFSExternalCachesDirectoryPath(): string | null {
     return window.fspaths.RNFSExternalCachesDirectoryPath;
+  }
+  public get RNFSResourcesPath(): string {
+    return window.fspaths.RNFSResourcesPath;
+  }
+  public get RNFSMainBundlePath(): string {
+    return window.fspaths.RNFSMainBundlePath;
   }
 
   public async downloadFile(

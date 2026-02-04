@@ -245,6 +245,8 @@ export const filesystem = {
 
       // Synchronous handler for preload script to get paths at startup
       ipcMain.on("axsy:fs:initPathsSync", event => {
+        // In dev mode, process.resourcesPath may not be set, so use app path as fallback
+        const resourcesPath = process.resourcesPath || app.getAppPath();
         event.returnValue = {
           RNFSSeparator: path.sep,
           RNFSDocumentDirectoryPath: app.getPath("userData"),
@@ -253,7 +255,9 @@ export const filesystem = {
           RNFSDownloadDirectoryPath: app.getPath("downloads"),
           RNFSExternalDirectoryPath: null,
           RNFSExternalStorageDirectoryPath: null,
-          RNFSExternalCachesDirectoryPath: null
+          RNFSExternalCachesDirectoryPath: null,
+          RNFSResourcesPath: resourcesPath,
+          RNFSMainBundlePath: app.getAppPath()
         };
       });
     }
