@@ -4,9 +4,10 @@ import utf8 from "./utf8";
 
 // Conditionally import electron API only on web platform to avoid
 // TypeScript checking electron-specific code in React Native builds
-const electronAPI = Platform.OS === "web"
-  ? require("./electron/renderer").electronAPI
-  : undefined;
+const electronAPI =
+  Platform.OS === "web"
+    ? require("./electron/renderer").electronAPI
+    : undefined;
 
 import type {
   FileOptions,
