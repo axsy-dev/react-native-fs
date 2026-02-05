@@ -14,6 +14,27 @@ import type { ObjectEncodingOptions, WriteStream } from "node:fs";
 const RNFSFileTypeRegular = 0;
 const RNFSFileTypeDirectory = 1;
 
+function getPathsConfig() {
+  const resourcesPath = app.isPackaged
+    ? process.resourcesPath
+    : path.join(app.getAppPath(), "..", "resources");
+  return {
+    RNFSSeparator: path.sep,
+    RNFSDocumentDirectoryPath: app.getPath("userData"),
+    RNFSTemporaryDirectoryPath: app.getPath("temp"),
+    RNFSPicturesDirectoryPath: app.getPath("pictures"),
+    RNFSDownloadDirectoryPath: app.getPath("downloads"),
+    RNFSFileTypeRegular: true,
+    RNFSFileTypeDirectory: true,
+    RNFSCachesDirectoryPath: null,
+    RNFSExternalDirectoryPath: null,
+    RNFSExternalStorageDirectoryPath: null,
+    RNFSExternalCachesDirectoryPath: null,
+    RNFSResourcesPath: resourcesPath,
+    RNFSMainBundlePath: app.getAppPath()
+  };
+}
+
 async function mkdir(
   _event: IpcMainInvokeEvent,
   dirpath: string,
@@ -95,20 +116,7 @@ async function writeFile(
 }
 
 async function initPaths(_event: IpcMainInvokeEvent) {
-  return {
-    RNFSSeparator: path.sep,
-    RNFSDocumentDirectoryPath: app.getPath("userData"),
-    RNFSTemporaryDirectoryPath: app.getPath("temp"),
-    RNFSPicturesDirectoryPath: app.getPath("pictures"),
-    RNFSDownloadDirectoryPath: app.getPath("downloads"),
-    RNFSFileTypeRegular: true,
-    RNFSFileTypeDirectory: true,
-
-    RNFSCachesDirectoryPath: null,
-    RNFSExternalDirectoryPath: null,
-    RNFSExternalStorageDirectoryPath: null,
-    RNFSExternalCachesDirectoryPath: null
-  };
+  return getPathsConfig();
 }
 
 async function readDir(
@@ -258,23 +266,7 @@ export const filesystem = {
 
       // Synchronous handler for preload script to get paths at startup
       ipcMain.on("axsy:fs:initPathsSync", event => {
-        // In dev mode (not packaged), use the app's out/resources directory
-        // In production (packaged), use process.resourcesPath
-        const resourcesPath = app.isPackaged
-          ? process.resourcesPath
-          : path.join(app.getAppPath(), "..", "resources");
-        event.returnValue = {
-          RNFSSeparator: path.sep,
-          RNFSDocumentDirectoryPath: app.getPath("userData"),
-          RNFSTemporaryDirectoryPath: app.getPath("temp"),
-          RNFSPicturesDirectoryPath: app.getPath("pictures"),
-          RNFSDownloadDirectoryPath: app.getPath("downloads"),
-          RNFSExternalDirectoryPath: null,
-          RNFSExternalStorageDirectoryPath: null,
-          RNFSExternalCachesDirectoryPath: null,
-          RNFSResourcesPath: resourcesPath,
-          RNFSMainBundlePath: app.getAppPath()
-        };
+        event.returnValue = getPathsConfig();
       });
     }
   }
