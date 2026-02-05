@@ -1,7 +1,13 @@
 import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
 import * as base64 from "base-64";
 import utf8 from "./utf8";
-import { electronAPI } from "./electron/renderer";
+
+// Conditionally import electron API only on web platform to avoid
+// TypeScript checking electron-specific code in React Native builds
+const electronAPI = Platform.OS === "web"
+  ? require("./electron/renderer").electronAPI
+  : undefined;
+
 import type {
   FileOptions,
   MkdirOptions,

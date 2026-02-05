@@ -78,7 +78,20 @@ async function writeFile(
   contents: string,
   options: ObjectEncodingOptions
 ) {
-  await fs.writeFile(filepath, contents, options);
+  // RNFS index.ts encodes all content as base64 before passing to native modules
+  // We need to decode it back to the original encoding
+  const encoding = typeof options === "string" ? options : options?.encoding;
+  let decodedContents: string | Buffer;
+
+  if (encoding === "base64") {
+    // Content is already base64 and should stay that way
+    decodedContents = contents;
+  } else {
+    // Content was encoded to base64 by RNFS, decode it
+    decodedContents = Buffer.from(contents, "base64");
+  }
+
+  await fs.writeFile(filepath, decodedContents, encoding === "base64" ? "utf8" : encoding);
 }
 
 async function initPaths(_event: IpcMainInvokeEvent) {
@@ -245,8 +258,11 @@ export const filesystem = {
 
       // Synchronous handler for preload script to get paths at startup
       ipcMain.on("axsy:fs:initPathsSync", event => {
-        // In dev mode, process.resourcesPath may not be set, so use app path as fallback
-        const resourcesPath = process.resourcesPath || app.getAppPath();
+        // In dev mode (not packaged), use the app's out/resources directory
+        // In production (packaged), use process.resourcesPath
+        const resourcesPath = app.isPackaged
+          ? process.resourcesPath
+          : path.join(app.getAppPath(), "..", "resources");
         event.returnValue = {
           RNFSSeparator: path.sep,
           RNFSDocumentDirectoryPath: app.getPath("userData"),
