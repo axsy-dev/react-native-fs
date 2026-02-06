@@ -14,6 +14,27 @@ import type { ObjectEncodingOptions, WriteStream } from "node:fs";
 const RNFSFileTypeRegular = 0;
 const RNFSFileTypeDirectory = 1;
 
+function getPathsConfig() {
+  const resourcesPath = app.isPackaged
+    ? process.resourcesPath
+    : path.join(app.getAppPath(), "..", "resources");
+  return {
+    RNFSSeparator: path.sep,
+    RNFSDocumentDirectoryPath: app.getPath("userData"),
+    RNFSTemporaryDirectoryPath: app.getPath("temp"),
+    RNFSPicturesDirectoryPath: app.getPath("pictures"),
+    RNFSDownloadDirectoryPath: app.getPath("downloads"),
+    RNFSFileTypeRegular: true,
+    RNFSFileTypeDirectory: true,
+    RNFSCachesDirectoryPath: null,
+    RNFSExternalDirectoryPath: null,
+    RNFSExternalStorageDirectoryPath: null,
+    RNFSExternalCachesDirectoryPath: null,
+    RNFSResourcesPath: resourcesPath,
+    RNFSMainBundlePath: app.getAppPath()
+  };
+}
+
 async function mkdir(
   _event: IpcMainInvokeEvent,
   dirpath: string,
@@ -78,24 +99,24 @@ async function writeFile(
   contents: string,
   options: ObjectEncodingOptions
 ) {
-  await fs.writeFile(filepath, contents, options);
+  // RNFS index.ts encodes all content as base64 before passing to native modules
+  // We need to decode it back to the original encoding
+  const encoding = typeof options === "string" ? options : options?.encoding;
+  let decodedContents: string | Buffer;
+
+  if (encoding === "base64") {
+    // Content is already base64 and should stay that way
+    decodedContents = contents;
+  } else {
+    // Content was encoded to base64 by RNFS, decode it
+    decodedContents = Buffer.from(contents, "base64");
+  }
+
+  await fs.writeFile(filepath, decodedContents, encoding === "base64" ? "utf8" : encoding);
 }
 
 async function initPaths(_event: IpcMainInvokeEvent) {
-  return {
-    RNFSSeparator: path.sep,
-    RNFSDocumentDirectoryPath: app.getPath("userData"),
-    RNFSTemporaryDirectoryPath: app.getPath("temp"),
-    RNFSPicturesDirectoryPath: app.getPath("pictures"),
-    RNFSDownloadDirectoryPath: app.getPath("downloads"),
-    RNFSFileTypeRegular: true,
-    RNFSFileTypeDirectory: true,
-
-    RNFSCachesDirectoryPath: null,
-    RNFSExternalDirectoryPath: null,
-    RNFSExternalStorageDirectoryPath: null,
-    RNFSExternalCachesDirectoryPath: null
-  };
+  return getPathsConfig();
 }
 
 async function readDir(
@@ -245,16 +266,7 @@ export const filesystem = {
 
       // Synchronous handler for preload script to get paths at startup
       ipcMain.on("axsy:fs:initPathsSync", event => {
-        event.returnValue = {
-          RNFSSeparator: path.sep,
-          RNFSDocumentDirectoryPath: app.getPath("userData"),
-          RNFSTemporaryDirectoryPath: app.getPath("temp"),
-          RNFSPicturesDirectoryPath: app.getPath("pictures"),
-          RNFSDownloadDirectoryPath: app.getPath("downloads"),
-          RNFSExternalDirectoryPath: null,
-          RNFSExternalStorageDirectoryPath: null,
-          RNFSExternalCachesDirectoryPath: null
-        };
+        event.returnValue = getPathsConfig();
       });
     }
   }

@@ -1,7 +1,14 @@
 import { NativeModules, NativeAppEventEmitter, Platform } from "react-native";
 import * as base64 from "base-64";
 import utf8 from "./utf8";
-import { electronAPI } from "./electron/renderer";
+
+// Conditionally import electron API only on web platform to avoid
+// TypeScript checking electron-specific code in React Native builds
+const electronAPI =
+  Platform.OS === "web"
+    ? require("./electron/renderer").electronAPI
+    : undefined;
+
 import type {
   FileOptions,
   MkdirOptions,
@@ -472,7 +479,9 @@ var RNFS = {
     );
   },
 
-  downloadFile(options: DownloadFileOptions): {
+  downloadFile(
+    options: DownloadFileOptions
+  ): {
     jobId: number;
     promise: Promise<DownloadResult>;
   } {
@@ -554,7 +563,9 @@ var RNFS = {
     };
   },
 
-  uploadFiles(options: UploadFileOptions): {
+  uploadFiles(
+    options: UploadFileOptions
+  ): {
     jobId: number;
     promise: Promise<UploadResult>;
   } {
@@ -659,23 +670,48 @@ var RNFS = {
     return RNFSManager.scanFile(path);
   },
 
-  MainBundlePath: RNFSManager.RNFSMainBundlePath,
-  CachesDirectoryPath: RNFSManager.RNFSCachesDirectoryPath,
-  ExternalCachesDirectoryPath: RNFSManager.RNFSExternalCachesDirectoryPath,
-  DocumentDirectoryPath: RNFSManager.RNFSDocumentDirectoryPath,
-  ExternalDirectoryPath: RNFSManager.RNFSExternalDirectoryPath,
-  ExternalStorageDirectoryPath: RNFSManager.RNFSExternalStorageDirectoryPath,
-  TemporaryDirectoryPath: RNFSManager.RNFSTemporaryDirectoryPath,
-  LibraryDirectoryPath: RNFSManager.RNFSLibraryDirectoryPath,
-  PicturesDirectoryPath: RNFSManager.RNFSPicturesDirectoryPath,
-  FileProtectionKeys: RNFSManager.RNFSFileProtectionKeys,
+  get MainBundlePath() {
+    return RNFSManager.RNFSMainBundlePath;
+  },
+  get ResourcesPath() {
+    return RNFSManager.RNFSResourcesPath;
+  },
+  get CachesDirectoryPath() {
+    return RNFSManager.RNFSCachesDirectoryPath;
+  },
+  get ExternalCachesDirectoryPath() {
+    return RNFSManager.RNFSExternalCachesDirectoryPath;
+  },
+  get DocumentDirectoryPath() {
+    return RNFSManager.RNFSDocumentDirectoryPath;
+  },
+  get ExternalDirectoryPath() {
+    return RNFSManager.RNFSExternalDirectoryPath;
+  },
+  get ExternalStorageDirectoryPath() {
+    return RNFSManager.RNFSExternalStorageDirectoryPath;
+  },
+  get TemporaryDirectoryPath() {
+    return RNFSManager.RNFSTemporaryDirectoryPath;
+  },
+  get LibraryDirectoryPath() {
+    return RNFSManager.RNFSLibraryDirectoryPath;
+  },
+  get PicturesDirectoryPath() {
+    return RNFSManager.RNFSPicturesDirectoryPath;
+  },
+  get FileProtectionKeys() {
+    return RNFSManager.RNFSFileProtectionKeys;
+  },
 
-  Separator: Platform.select({
-    ios: "/",
-    android: "/",
-    windows: "\\",
-    web: RNFSManager.RNFSSeparator
-  })
+  get Separator() {
+    return Platform.select({
+      ios: "/",
+      android: "/",
+      windows: "\\",
+      web: RNFSManager.RNFSSeparator
+    });
+  }
 };
 
 export default RNFS;
