@@ -4,6 +4,21 @@
   "description": "Native filesystem access for react-native",
   "main": "FS.common.js",
   "typings": "index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json",
+    "./main": {
+      "types": "./main/index.d.ts",
+      "default": "./main/index.js"
+    },
+    "./preload": {
+      "types": "./preload/index.d.ts",
+      "default": "./preload/index.js"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "flow": "flow; test $? -eq 0 -o $? -eq 2",

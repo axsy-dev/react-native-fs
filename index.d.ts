@@ -293,3 +293,4 @@ export const TemporaryDirectoryPath: string;
 export const LibraryDirectoryPath: string;
 export const PicturesDirectoryPath: string;
 export const FileProtectionKeys: string;
+export const Separator: string;
