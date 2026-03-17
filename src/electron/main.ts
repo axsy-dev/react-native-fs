@@ -97,22 +97,12 @@ async function writeFile(
   _event: IpcMainInvokeEvent,
   filepath: string,
   contents: string,
-  options: ObjectEncodingOptions
+  _options: ObjectEncodingOptions
 ) {
-  // RNFS index.ts encodes all content as base64 before passing to native modules
-  // We need to decode it back to the original encoding
-  const encoding = typeof options === "string" ? options : options?.encoding;
-  let decodedContents: string | Buffer;
-
-  if (encoding === "base64") {
-    // Content is already base64 and should stay that way
-    decodedContents = contents;
-  } else {
-    // Content was encoded to base64 by RNFS, decode it
-    decodedContents = Buffer.from(contents, "base64");
-  }
-
-  await fs.writeFile(filepath, decodedContents, encoding === "base64" ? "utf8" : encoding);
+  // RNFS index.ts always base64-encodes content before passing to native modules.
+  // Decode back to a raw Buffer and write binary.
+  const decodedContents = Buffer.from(contents, "base64");
+  await fs.writeFile(filepath, decodedContents);
 }
 
 async function initPaths(_event: IpcMainInvokeEvent) {
@@ -235,8 +225,8 @@ async function _streamFile(
 async function getFSInfo(_event: IpcMainInvokeEvent) {
   const st = await fs.statfs(os.homedir());
   return {
-    freeSpace: st.blocks * st.bsize,
-    totalSpace: st.bfree * st.bsize
+    freeSpace: st.bfree * st.bsize,
+    totalSpace: st.blocks * st.bsize
   };
 }
 
