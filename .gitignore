@@ -94,3 +94,5 @@ nitrogen/
 !.yarn/versions
 .pnp.cjs
 .pnp.loader.mjs
+
+.claude/settings.local.json
