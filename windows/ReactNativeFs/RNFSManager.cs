@@ -1,7 +1,4 @@
-using Newtonsoft.Json.Linq;
-using ReactNative.Bridge;
-using ReactNative.Modules.Core;
-using ReactNative.Modules.Network;
+using Microsoft.ReactNative.Managed;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,12 +11,11 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Storage;
 
-namespace RNFS
+namespace RNFSvnext
 {
-    class RNFSManager : ReactContextNativeModuleBase
+    [ReactModule]
+    class RNFSManager
     {
-        private const int FileType = 0;
-        private const int DirectoryType = 1;
 
         private static readonly IReadOnlyDictionary<string, Func<HashAlgorithm>> s_hashAlgorithms =
             new Dictionary<string, Func<HashAlgorithm>>
@@ -34,77 +30,144 @@ namespace RNFS
         private readonly TaskCancellationManager<int> _tasks = new TaskCancellationManager<int>();
         private readonly HttpClient _httpClient = new HttpClient();
 
-        private RCTNativeAppEventEmitter _emitter;
-        
-        public RNFSManager(ReactContext reactContext)
-            : base(reactContext)
-        {
-        }
-
-        public override string Name
+        [ReactConstant]
+        public string RNFSMainBundlePath
         {
             get
             {
-                return "RNFSManager";
-            }
-        }
-
-        internal RCTNativeAppEventEmitter Emitter
-        {
-            get
-            {
-                if (_emitter == null)
+                try
                 {
-                    return Context.GetJavaScriptModule<RCTNativeAppEventEmitter>();
+                    var mainBundlePath = Package.Current.InstalledLocation.Path;
+                    return mainBundlePath;
+                }
+                catch (Exception)
+                {
+                    return "";
                 }
 
-                return _emitter;
-            }
-            set
-            {
-                _emitter = value;
             }
         }
 
-        [Obsolete]
-        public override IReadOnlyDictionary<string, object> Constants
+        [ReactConstant]
+        public string RNFSCachesDirectoryPath
         {
             get
             {
-                var constants = new Dictionary<string, object>
+                try
                 {
-                    { "RNFSMainBundlePath", Package.Current.InstalledLocation.Path },
-                    { "RNFSCachesDirectoryPath", ApplicationData.Current.LocalCacheFolder.Path },
-                    { "RNFSRoamingDirectoryPath", ApplicationData.Current.RoamingFolder.Path },
-                    { "RNFSDocumentDirectoryPath", ApplicationData.Current.LocalFolder.Path },
-                    { "RNFSTemporaryDirectoryPath", ApplicationData.Current.TemporaryFolder.Path },
-                    { "RNFSFileTypeRegular", 0 },
-                    { "RNFSFileTypeDirectory", 1 },
-                };
+                    return ApplicationData.Current.LocalCacheFolder.Path;
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+        }
 
+        [ReactConstant]
+        public string RNFSRoamingDirectoryPath
+        {
+            get
+            {
+                try
+                {
+                    return ApplicationData.Current.RoamingFolder.Path;
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+        }
+
+        [ReactConstant]
+        public string RNFSDocumentDirectoryPath
+        {
+            get
+            {
+                try
+                {
+                    return ApplicationData.Current.LocalFolder.Path;
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+        }
+
+        [ReactConstant]
+        public string RNFSTemporaryDirectoryPath
+        {
+            get
+            {
+                try
+                {
+                    return ApplicationData.Current.TemporaryFolder.Path;
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
+            }
+        }
+
+        [ReactConstant]
+        public int RNFSFileTypeRegular = 0;
+
+        [ReactConstant]
+        public int RNFSFileTypeDirectory = 1;
+
+        [ReactConstant]
+        public string RNFSExternalDirectoryPath
+        {
+            get
+            {
                 var external = GetFolderPathSafe(() => KnownFolders.RemovableDevices);
                 if (external != null)
                 {
                     var externalItems = KnownFolders.RemovableDevices.GetItemsAsync().AsTask().Result;
                     if (externalItems.Count > 0)
                     {
-                        constants.Add("RNFSExternalDirectoryPath", externalItems[0].Path);
+                        return externalItems[0].Path;
                     }
-                    constants.Add("RNFSExternalDirectoryPaths", externalItems.Select(i => i.Path).ToArray());
                 }
-
-                var pictures = GetFolderPathSafe(() => KnownFolders.PicturesLibrary);
-                if (pictures != null)
-                {
-                    constants.Add("RNFSPicturesDirectoryPath", pictures);
-                }
-
-                return constants;
+                return "";
             }
         }
 
+        [ReactConstant]
+        public string[] RNFSExternalDirectoryPaths
+        {
+            get
+            {
+                var external = GetFolderPathSafe(() => KnownFolders.RemovableDevices);
+                if (external != null)
+                {
+                    var externalItems = KnownFolders.RemovableDevices.GetItemsAsync().AsTask().Result;
+                    return externalItems.Select(i => i.Path).ToArray();
+                }
+                return new string[] { };
+            }
+        }
+
+        [ReactConstant]
+        public string RNFSPicturesDirectoryPath
+        {
+            get
+            {
+                var pictures = GetFolderPathSafe(() => KnownFolders.PicturesLibrary);
+                if (pictures != null)
+                {
+                    return pictures;
+                }
+                return "";
+            }
+        }
+
+
         [ReactMethod]
-        public async void writeFile(string filepath, string base64Content, JObject options, IPromise promise)
+        public async void writeFile(string filepath, string base64Content, IReadOnlyDictionary<string, JSValue> options, IReactPromise<int> promise)
         {
             try
             {
@@ -115,7 +178,7 @@ namespace RNFS
                     await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(0);
             }
             catch (Exception ex)
             {
@@ -124,7 +187,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void appendFile(string filepath, string base64Content, IPromise promise)
+        public async void appendFile(string filepath, string base64Content, IReactPromise<int> promise)
         {
             try
             {
@@ -135,7 +198,7 @@ namespace RNFS
                     await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(0);
             }
             catch (Exception ex)
             {
@@ -144,7 +207,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void write(string filepath, string base64Content, int position, IPromise promise)
+        public async void write(string filepath, string base64Content, int position, IReactPromise<int> promise)
         {
             try
             {
@@ -160,7 +223,7 @@ namespace RNFS
                     await file.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(0);
             }
             catch (Exception ex)
             {
@@ -169,7 +232,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void exists(string filepath, IPromise promise)
+        public void exists(string filepath, IReactPromise<bool> promise)
         {
             try
             {
@@ -182,7 +245,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void readFile(string filepath, IPromise promise)
+        public async void readFile(string filepath, IReactPromise<string> promise)
         {
             try
             {
@@ -206,12 +269,12 @@ namespace RNFS
             }
             catch (Exception ex)
             {
-                Reject(promise, filepath, ex); 
+                Reject(promise, filepath, ex);
             }
         }
 
         [ReactMethod]
-        public async void read(string filepath, int length, int position, IPromise promise)
+        public async void read(string filepath, int length, int position, IReactPromise<string> promise)
         {
             try
             {
@@ -240,12 +303,14 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void hash(string filepath, string algorithm, IPromise promise)
+        public async void hash(string filepath, string algorithm, IReactPromise<string> promise)
         {
             var hashAlgorithmFactory = default(Func<HashAlgorithm>);
             if (!s_hashAlgorithms.TryGetValue(algorithm, out hashAlgorithmFactory))
             {
-                promise.Reject(null, "Invalid hash algorithm.");
+                ReactError err = new ReactError();
+                err.Message = "Invalid hash algorithm";
+                promise.Reject(err);
                 return;
             }
 
@@ -285,7 +350,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void moveFile(string filepath, string destPath, JObject options, IPromise promise)
+        public void moveFile(string filepath, string destPath, JSValue options, IReactPromise<bool> promise)
         {
             try
             {
@@ -300,12 +365,12 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void copyFile(string filepath, string destPath, JObject options, IPromise promise)
+        public async void copyFile(string filepath, string destPath, JSValue options, IReactPromise<int> promise)
         {
             try
             {
                 await Task.Run(() => File.Copy(filepath, destPath)).ConfigureAwait(false);
-                promise.Resolve(null);
+                promise.Resolve(0);
 
             }
             catch (Exception ex)
@@ -315,7 +380,22 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void readDir(string directory, IPromise promise)
+        public async void copyToPictures(string filepath, IReactPromise<bool> promise)
+        {
+            try
+            {
+                var srcFile = await StorageFile.GetFileFromPathAsync(filepath);
+                await srcFile.CopyAsync(KnownFolders.PicturesLibrary, srcFile.Name, NameCollisionOption.ReplaceExisting);
+                promise.Resolve(true);
+            }
+            catch (Exception e)
+            {
+                Reject(promise, filepath, e);
+            }
+        }
+
+        [ReactMethod]
+        public async void readDir(string directory, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -324,36 +404,38 @@ namespace RNFS
                     var info = new DirectoryInfo(directory);
                     if (!info.Exists)
                     {
-                        promise.Reject(null, "Folder does not exist");
+                        var err = new ReactError();
+                        err.Message = "Folder does not exist";
+                        promise.Reject(err);
                         return;
                     }
 
-                    var fileMaps = new JArray();
+                    var fileMaps = new List<JSValue>();
                     foreach (var item in info.EnumerateFileSystemInfos())
                     {
-                        var fileMap = new JObject
+                        var fileMap = new Dictionary<string, JSValue>()
                         {
-                            { "mtime", ConvertToUnixTimestamp(item.LastWriteTime) },
-                            { "name", item.Name },
-                            { "path", item.FullName },
+                            { "mtime", new JSValue(ConvertToUnixTimestamp(item.LastWriteTime)) },
+                            { "name", new JSValue(item.Name) },
+                            { "path", new JSValue(item.FullName) },
                         };
 
                         var fileItem = item as FileInfo;
                         if (fileItem != null)
                         {
-                            fileMap.Add("type", FileType);
-                            fileMap.Add("size", fileItem.Length);
+                            fileMap.Add("type", new JSValue(RNFSFileTypeRegular));
+                            fileMap.Add("size", new JSValue(fileItem.Length));
                         }
                         else
                         {
-                            fileMap.Add("type", DirectoryType);
-                            fileMap.Add("size", 0);
+                            fileMap.Add("type", new JSValue(RNFSFileTypeDirectory));
+                            fileMap.Add("size", new JSValue(0));
                         }
 
-                        fileMaps.Add(fileMap);
+                        fileMaps.Add(new JSValue(fileMap));
                     }
 
-                    promise.Resolve(fileMaps);
+                    promise.Resolve(new JSValue(fileMaps));
                 });
             }
             catch (Exception ex)
@@ -363,7 +445,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public void stat(string filepath, IPromise promise)
+        public void stat(string filepath, IReactPromise<JSValue> promise)
         {
             try
             {
@@ -373,21 +455,23 @@ namespace RNFS
                     fileSystemInfo = new DirectoryInfo(filepath);
                     if (!fileSystemInfo.Exists)
                     {
-                        promise.Reject(null, "File does not exist.");
+                        ReactError err = new ReactError();
+                        err.Message = "File does not exist.";
+                        promise.Reject(err);
                         return;
                     }
                 }
 
                 var fileInfo = fileSystemInfo as FileInfo;
-                var statMap = new JObject
+                var statMap = new Dictionary<string, JSValue>
                 {
-                    { "ctime", ConvertToUnixTimestamp(fileSystemInfo.CreationTime) },
-                    { "mtime", ConvertToUnixTimestamp(fileSystemInfo.LastWriteTime) },
-                    { "size", fileInfo?.Length ?? 0 },
-                    { "type", fileInfo != null ? FileType: DirectoryType },
+                    { "ctime", new JSValue(ConvertToUnixTimestamp(fileSystemInfo.CreationTime)) },
+                    { "mtime", new JSValue(ConvertToUnixTimestamp(fileSystemInfo.LastWriteTime)) },
+                    { "size", new JSValue(fileInfo?.Length ?? 0) },
+                    { "type", new JSValue(fileInfo != null ? RNFSFileTypeRegular: RNFSFileTypeDirectory) },
                 };
 
-                promise.Resolve(statMap);
+                promise.Resolve(new JSValue(statMap));
             }
             catch (Exception ex)
             {
@@ -396,7 +480,7 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void unlink(string filepath, IPromise promise)
+        public async void unlink(string filepath, IReactPromise<int> promise)
         {
             try
             {
@@ -412,11 +496,13 @@ namespace RNFS
                 }
                 else
                 {
-                    promise.Reject(null, "File does not exist.");
+                    var err = new ReactError();
+                    err.Message = "File does not exist.";
+                    promise.Reject(err);
                     return;
                 }
 
-                promise.Resolve(null);
+                promise.Resolve(0);
             }
             catch (Exception ex)
             {
@@ -425,12 +511,12 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void mkdir(string filepath, JObject options, IPromise promise)
+        public async void mkdir(string filepath, JSValue options, IReactPromise<int> promise)
         {
             try
             {
                 await Task.Run(() => Directory.CreateDirectory(filepath)).ConfigureAwait(false);
-                promise.Resolve(null);
+                promise.Resolve(0);
             }
             catch (Exception ex)
             {
@@ -439,24 +525,25 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void downloadFile(JObject options, IPromise promise)
+        public async void downloadFile(IReadOnlyDictionary<string, JSValue> options, IReactPromise<IReadOnlyDictionary<string, JSValue>> promise)
         {
-            var filepath = options.Value<string>("toFile");
+
+            var filepath = options["toFile"].To<string>();
 
             try
             {
-                var url = new Uri(options.Value<string>("fromUrl"));
-                var jobId = options.Value<int>("jobId");
-                var headers = (JObject)options["headers"];
-                var progressDivider = options.Value<int>("progressDivider");
+                var url = new Uri(options["fromUrl"].To<string>());
+                var jobId = options["jobId"].To<int>();
+                var headers = options["headers"].To<IReadOnlyDictionary<string, JSValue>>();
+                var progressDivider = options["progressDivider"].To<int>();
 
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 foreach (var header in headers)
                 {
-                    request.Headers.Add(header.Key, header.Value.Value<string>());
+                    request.Headers.Add(header.Key, header.Value.To<string>());
                 }
 
-                await _tasks.AddAndInvokeAsync(jobId, token => 
+                await _tasks.AddAndInvokeAsync(jobId, token =>
                     ProcessRequestAsync(promise, request, filepath, jobId, progressDivider, token));
             }
             catch (Exception ex)
@@ -472,12 +559,12 @@ namespace RNFS
         }
 
         [ReactMethod]
-        public async void getFSInfo(IPromise promise)
+        public async void getFSInfo(IReactPromise<IReadOnlyDictionary<string, JSValue>> promise)
         {
             try
             {
                 var properties = await ApplicationData.Current.LocalFolder.Properties.RetrievePropertiesAsync(
-                    new[] 
+                    new[]
                     {
                         "System.FreeSpace",
                         "System.Capacity",
@@ -485,20 +572,23 @@ namespace RNFS
                     .AsTask()
                     .ConfigureAwait(false);
 
-                promise.Resolve(new JObject
+                promise.Resolve(new Dictionary<string, JSValue>
                 {
-                    { "freeSpace", (ulong)properties["System.FreeSpace"] },
-                    { "totalSpace", (ulong)properties["System.Capacity"] },
+                    { "freeSpace", new JSValue((ulong)properties["System.FreeSpace"]) },
+                    { "totalSpace", new JSValue((ulong)properties["System.Capacity"]) },
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                promise.Reject(null, "getFSInfo is not available");
+                var err = new ReactError();
+                err.Exception = ex;
+
+                promise.Reject(err);
             }
         }
 
         [ReactMethod]
-        public async void touch(string filepath, double mtime, double ctime, IPromise promise)
+        public async void touch(string filepath, double mtime, double ctime, IReactPromise<string> promise)
         {
             try
             {
@@ -522,32 +612,43 @@ namespace RNFS
             }
         }
 
-        public override void OnReactInstanceDispose()
+        
+        ~RNFSManager()
         {
             _tasks.CancelAllTasks();
             _httpClient.Dispose();
         }
 
-        private async Task ProcessRequestAsync(IPromise promise, HttpRequestMessage request, string filepath, int jobId, int progressIncrement, CancellationToken token)
+        [ReactEvent]
+        public Action<JSValue> DownloadBegin = null;
+
+        [ReactEvent]
+        public Action<JSValue> DownloadProgress = null;
+
+        private async Task ProcessRequestAsync(IReactPromise<IReadOnlyDictionary<string, JSValue>> promise, HttpRequestMessage request, string filepath, int jobId, int progressIncrement, CancellationToken token)
         {
             try
             {
                 using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token))
                 {
-                    var headersMap = new JObject();
+                    var headersMap = new Dictionary<string, JSValue>();
                     foreach (var header in response.Headers)
                     {
-                        headersMap.Add(header.Key, string.Join(",", header.Value));
+                        headersMap.Add(header.Key, new JSValue(string.Join(",", header.Value)));
                     }
 
-                    var contentLength = response.Content.Headers.ContentLength;
-                    SendEvent($"DownloadBegin-{jobId}", new JObject
+                    var contentLength = response.Content.Headers.ContentLength ;
+                    var beginEvent = new JSValue(new Dictionary<string, JSValue>
                     {
-                        { "jobId", jobId },
-                        { "statusCode", (int)response.StatusCode },
-                        { "contentLength", contentLength },
-                        { "headers", headersMap },
+                        { "jobId", new JSValue(jobId) },
+                        { "statusCode", new JSValue((int)response.StatusCode) },
+                        { "contentLength", contentLength.HasValue ? new JSValue( contentLength.Value ) : JSValue.Null },
+                        { "headers", new JSValue(headersMap) }
                     });
+                    
+                    // TODO this is throwing exception
+                    DownloadBegin(beginEvent);
+                    
 
                     // TODO: open file on background thread?
                     long totalRead = 0;
@@ -569,12 +670,18 @@ namespace RNFS
                                 if (totalRead * 100 / contentLengthForProgress >= nextProgressIncrement ||
                                     totalRead == contentLengthForProgress)
                                 {
-                                    SendEvent("DownloadProgress-" + jobId, new JObject
-                                    {
-                                        { "jobId", jobId },
-                                        { "contentLength", contentLength },
-                                        { "bytesWritten", totalRead },
-                                    });
+                                    var progressEvent = new JSValue(
+                                        new Dictionary<string, JSValue>
+
+                                        {
+                                            { "jobId", new JSValue(jobId) },
+                                            { "contentLength", contentLength.HasValue ? new JSValue( contentLength.Value ) : JSValue.Null },
+                                            { "bytesWritten", new JSValue(totalRead) }
+                                        }
+                                    );
+
+                                    // TODO this is throwing exception
+                                    DownloadProgress(progressEvent);
 
                                     nextProgressIncrement += progressIncrement;
                                 }
@@ -582,13 +689,19 @@ namespace RNFS
                         }
                     }
 
-                    promise.Resolve(new JObject
+                    promise.Resolve(new Dictionary<string, JSValue>()
                     {
-                        { "jobId", jobId },
-                        { "statusCode", (int)response.StatusCode },
-                        { "bytesWritten", totalRead },
+                        { "jobId", new JSValue(jobId) },
+                        { "statusCode", new JSValue((int)response.StatusCode) },
+                        { "bytesWritten", new JSValue(totalRead) },
                     });
                 }
+            }
+            catch (OperationCanceledException ex)
+            {
+                var err = new ReactError();
+                err.Exception = ex;
+                promise.Reject(err);
             }
             finally
             {
@@ -596,24 +709,20 @@ namespace RNFS
             }
         }
 
-        private void Reject(IPromise promise, String filepath, Exception ex)
+        private void Reject<T>(IReactPromise<T> promise, String filepath, Exception ex)
         {
             if (ex is FileNotFoundException) {
                 RejectFileNotFound(promise, filepath);
                 return;
             }
-
-            promise.Reject(ex);
+            ReactError err = new ReactError{ Exception = ex };
+            promise.Reject(err);
         }
 
-        private void RejectFileNotFound(IPromise promise, String filepath)
+        private void RejectFileNotFound<T>(IReactPromise<T> promise, String filepath)
         {
-            promise.Reject("ENOENT", "ENOENT: no such file or directory, open '" + filepath + "'");
-        }
-
-        private void SendEvent(string eventName, JObject eventData)
-        {
-            Emitter.emit(eventName, eventData);
+            ReactError err = new ReactError { Message = "ENOENT: no such file or directory, open '" + filepath + "'" };
+            promise.Reject(err);
         }
 
         private static string GetFolderPathSafe(Func<StorageFolder> getFolder)

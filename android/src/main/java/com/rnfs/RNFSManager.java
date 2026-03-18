@@ -8,11 +8,9 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.MediaStore;
-
 import android.util.Base64;
 import android.util.SparseArray;
 import android.media.MediaScannerConnection;
-import android.net.Uri;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -24,6 +22,7 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter;
 
 import java.io.ByteArrayOutputStream;
@@ -40,12 +39,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@ReactModule(name = RNFSManager.MODULE_NAME)
 public class RNFSManager extends ReactContextBaseJavaModule {
+
+  static final String MODULE_NAME = "RNFSManager";
 
   private static final String RNFSDocumentDirectoryPath = "RNFSDocumentDirectoryPath";
   private static final String RNFSExternalDirectoryPath = "RNFSExternalDirectoryPath";
   private static final String RNFSExternalStorageDirectoryPath = "RNFSExternalStorageDirectoryPath";
   private static final String RNFSPicturesDirectoryPath = "RNFSPicturesDirectoryPath";
+  private static final String RNFSDownloadDirectoryPath = "RNFSDownloadDirectoryPath";
   private static final String RNFSTemporaryDirectoryPath = "RNFSTemporaryDirectoryPath";
   private static final String RNFSCachesDirectoryPath = "RNFSCachesDirectoryPath";
   private static final String RNFSExternalCachesDirectoryPath = "RNFSExternalCachesDirectoryPath";
@@ -54,8 +57,8 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   private static final String RNFSFileTypeRegular = "RNFSFileTypeRegular";
   private static final String RNFSFileTypeDirectory = "RNFSFileTypeDirectory";
 
-  private SparseArray<Downloader> downloaders = new SparseArray<Downloader>();
-  private SparseArray<Uploader> uploaders = new SparseArray<Uploader>();
+  private SparseArray<Downloader> downloaders = new SparseArray<>();
+  private SparseArray<Uploader> uploaders = new SparseArray<>();
 
   private ReactApplicationContext reactContext;
 
@@ -66,7 +69,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
 
   @Override
   public String getName() {
-    return "RNFSManager";
+    return MODULE_NAME;
   }
 
   private Uri getFileUri(String filepath, boolean isDirectoryAllowed) throws IORejectionException {
@@ -91,6 +94,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
         if (cursor.moveToFirst()) {
           originalFilepath = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
         }
+        cursor.close();
       } catch (IllegalArgumentException ignored) {
       }
     }
@@ -285,7 +289,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       byte[] buffer = new byte[stream.available()];
       stream.read(buffer);
       String base64Content = Base64.encodeToString(buffer, Base64.NO_WRAP);
-      promise.resolve(base64Content);;
+      promise.resolve(base64Content);
     } catch (Exception ex) {
       ex.printStackTrace();
       reject(promise, filename, ex);
@@ -436,7 +440,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
         fileMap.putDouble("mtime", (double) childFile.lastModified() / 1000);
         fileMap.putString("name", childFile.getName());
         fileMap.putString("path", childFile.getAbsolutePath());
-        fileMap.putInt("size", (int) childFile.length());
+        fileMap.putDouble("size", (double) childFile.length());
         fileMap.putInt("type", childFile.isDirectory() ? 1 : 0);
 
         fileMaps.pushMap(fileMap);
@@ -473,7 +477,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
           }
         } catch (IOException ex) {
           //.. ah.. is a directory or a compressed file?
-          isDirectory = ex.getMessage().indexOf("compressed") == -1;
+          isDirectory = !ex.getMessage().contains("compressed");
         }
         fileMap.putInt("size", length);
         fileMap.putInt("type", isDirectory ? 1 : 0); // if 0, probably a folder..
@@ -627,7 +631,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       WritableMap statMap = Arguments.createMap();
       statMap.putInt("ctime", (int) (file.lastModified() / 1000));
       statMap.putInt("mtime", (int) (file.lastModified() / 1000));
-      statMap.putInt("size", (int) file.length());
+      statMap.putDouble("size", (double) file.length());
       statMap.putInt("type", file.isDirectory() ? 1 : 0);
       statMap.putString("originalFilepath", originalFilepath);
 
@@ -695,15 +699,19 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       URL url = new URL(options.getString("fromUrl"));
       final int jobId = options.getInt("jobId");
       ReadableMap headers = options.getMap("headers");
+      int progressInterval = options.getInt("progressInterval");
       int progressDivider = options.getInt("progressDivider");
       int readTimeout = options.getInt("readTimeout");
       int connectionTimeout = options.getInt("connectionTimeout");
+      boolean hasBeginCallback = options.getBoolean("hasBeginCallback");
+      boolean hasProgressCallback = options.getBoolean("hasProgressCallback");
 
       DownloadParams params = new DownloadParams();
 
       params.src = url;
       params.dest = file;
       params.headers = headers;
+      params.progressInterval = progressInterval;
       params.progressDivider = progressDivider;
       params.readTimeout = readTimeout;
       params.connectionTimeout = connectionTimeout;
@@ -724,36 +732,40 @@ public class RNFSManager extends ReactContextBaseJavaModule {
         }
       };
 
-      params.onDownloadBegin = new DownloadParams.OnDownloadBegin() {
-        public void onDownloadBegin(int statusCode, long contentLength, Map<String, String> headers) {
-          WritableMap headersMap = Arguments.createMap();
+      if (hasBeginCallback) {
+        params.onDownloadBegin = new DownloadParams.OnDownloadBegin() {
+          public void onDownloadBegin(int statusCode, long contentLength, Map<String, String> headers) {
+            WritableMap headersMap = Arguments.createMap();
 
-          for (Map.Entry<String, String> entry : headers.entrySet()) {
-            headersMap.putString(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+              headersMap.putString(entry.getKey(), entry.getValue());
+            }
+
+            WritableMap data = Arguments.createMap();
+
+            data.putInt("jobId", jobId);
+            data.putInt("statusCode", statusCode);
+            data.putDouble("contentLength", (double)contentLength);
+            data.putMap("headers", headersMap);
+
+            sendEvent(getReactApplicationContext(), "DownloadBegin", data);
           }
+        };
+      }
 
-          WritableMap data = Arguments.createMap();
+      if (hasProgressCallback) {
+        params.onDownloadProgress = new DownloadParams.OnDownloadProgress() {
+          public void onDownloadProgress(long contentLength, long bytesWritten) {
+            WritableMap data = Arguments.createMap();
 
-          data.putInt("jobId", jobId);
-          data.putInt("statusCode", statusCode);
-          data.putDouble("contentLength", (double)contentLength);
-          data.putMap("headers", headersMap);
+            data.putInt("jobId", jobId);
+            data.putDouble("contentLength", (double)contentLength);
+            data.putDouble("bytesWritten", (double)bytesWritten);
 
-          sendEvent(getReactApplicationContext(), "DownloadBegin-" + jobId, data);
-        }
-      };
-
-      params.onDownloadProgress = new DownloadParams.OnDownloadProgress() {
-        public void onDownloadProgress(long contentLength, long bytesWritten) {
-          WritableMap data = Arguments.createMap();
-
-          data.putInt("jobId", jobId);
-          data.putDouble("contentLength", (double)contentLength);
-          data.putDouble("bytesWritten", (double)bytesWritten);
-
-          sendEvent(getReactApplicationContext(), "DownloadProgress-" + jobId, data);
-        }
-      };
+            sendEvent(getReactApplicationContext(), "DownloadProgress", data);
+          }
+        };
+      }
 
       Downloader downloader = new Downloader();
 
@@ -784,6 +796,10 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       ReadableMap headers = options.getMap("headers");
       ReadableMap fields = options.getMap("fields");
       String method = options.getString("method");
+      boolean binaryStreamOnly = options.getBoolean("binaryStreamOnly");
+      boolean hasBeginCallback = options.getBoolean("hasBeginCallback");
+      boolean hasProgressCallback = options.getBoolean("hasProgressCallback");
+
       ArrayList<ReadableMap> fileList = new ArrayList<>();
       UploadParams params = new UploadParams();
       for(int i =0;i<files.size();i++){
@@ -792,8 +808,9 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       params.src = url;
       params.files =fileList;
       params.headers = headers;
-      params.method=method;
-      params.fields=fields;
+      params.method = method;
+      params.fields = fields;
+      params.binaryStreamOnly = binaryStreamOnly;
       params.onUploadComplete = new UploadParams.onUploadComplete() {
         public void onUploadComplete(UploadResult res) {
           if (res.exception == null) {
@@ -810,27 +827,31 @@ public class RNFSManager extends ReactContextBaseJavaModule {
         }
       };
 
-      params.onUploadBegin = new UploadParams.onUploadBegin() {
-        public void onUploadBegin() {
-          WritableMap data = Arguments.createMap();
+      if (hasBeginCallback) {
+        params.onUploadBegin = new UploadParams.onUploadBegin() {
+          public void onUploadBegin() {
+            WritableMap data = Arguments.createMap();
 
-          data.putInt("jobId", jobId);
+            data.putInt("jobId", jobId);
 
-          sendEvent(getReactApplicationContext(), "UploadBegin-" + jobId, data);
-        }
-      };
+            sendEvent(getReactApplicationContext(), "UploadBegin", data);
+          }
+        };
+      }
 
-      params.onUploadProgress = new UploadParams.onUploadProgress() {
-        public void onUploadProgress(int totalBytesExpectedToSend,int totalBytesSent) {
-          WritableMap data = Arguments.createMap();
+      if (hasProgressCallback) {
+        params.onUploadProgress = new UploadParams.onUploadProgress() {
+          public void onUploadProgress(int totalBytesExpectedToSend,int totalBytesSent) {
+            WritableMap data = Arguments.createMap();
 
-          data.putInt("jobId", jobId);
-          data.putInt("totalBytesExpectedToSend", totalBytesExpectedToSend);
-          data.putInt("totalBytesSent", totalBytesSent);
+            data.putInt("jobId", jobId);
+            data.putInt("totalBytesExpectedToSend", totalBytesExpectedToSend);
+            data.putInt("totalBytesSent", totalBytesSent);
 
-          sendEvent(getReactApplicationContext(), "UploadProgress-" + jobId, data);
-        }
-      };
+            sendEvent(getReactApplicationContext(), "UploadProgress", data);
+          }
+        };
+      }
 
       Uploader uploader = new Uploader();
 
@@ -866,11 +887,16 @@ public class RNFSManager extends ReactContextBaseJavaModule {
   public void getFSInfo(Promise promise) {
     File path = Environment.getDataDirectory();
     StatFs stat = new StatFs(path.getPath());
+    StatFs statEx = new StatFs(Environment.getExternalStorageDirectory().getPath());
     long totalSpace;
     long freeSpace;
+    long totalSpaceEx = 0;
+    long freeSpaceEx = 0;
     if (android.os.Build.VERSION.SDK_INT >= 18) {
       totalSpace = stat.getTotalBytes();
       freeSpace = stat.getFreeBytes();
+      totalSpaceEx = statEx.getTotalBytes();
+      freeSpaceEx = statEx.getFreeBytes();
     } else {
       long blockSize = stat.getBlockSize();
       totalSpace = blockSize * stat.getBlockCount();
@@ -879,6 +905,8 @@ public class RNFSManager extends ReactContextBaseJavaModule {
     WritableMap info = Arguments.createMap();
     info.putDouble("totalSpace", (double) totalSpace);   // Int32 too small, must use Double
     info.putDouble("freeSpace", (double) freeSpace);
+    info.putDouble("totalSpaceEx", (double) totalSpaceEx);
+    info.putDouble("freeSpaceEx", (double) freeSpaceEx);
     promise.resolve(info);
   }
 
@@ -898,7 +926,9 @@ public class RNFSManager extends ReactContextBaseJavaModule {
     File[] allExternalFilesDirs = this.getReactApplicationContext().getExternalFilesDirs(null);
     WritableArray fs = Arguments.createArray();
     for (File f : allExternalFilesDirs) {
-      fs.pushString(f.getAbsolutePath());
+      if (f != null) {
+        fs.pushString(f.getAbsolutePath());
+      }
     }
     promise.resolve(fs);
   }
@@ -950,6 +980,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
     constants.put(RNFSTemporaryDirectoryPath, this.getReactApplicationContext().getCacheDir().getAbsolutePath());
     constants.put(RNFSPicturesDirectoryPath, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath());
     constants.put(RNFSCachesDirectoryPath, this.getReactApplicationContext().getCacheDir().getAbsolutePath());
+    constants.put(RNFSDownloadDirectoryPath, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
     constants.put(RNFSFileTypeRegular, 0);
     constants.put(RNFSFileTypeDirectory, 1);
 
