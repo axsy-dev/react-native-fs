@@ -960,7 +960,7 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       return;
     }
 
-    promise.reject(null, ex.getMessage());
+    promise.reject("EUNSPECIFIED", ex.getMessage());
   }
 
   private void rejectFileNotFound(Promise promise, String filepath) {
