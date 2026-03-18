@@ -42,13 +42,12 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-fs-example",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "typecheck": "tsc",
     "format": "prettier --check .",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "check": "yarn run lint && yarn run typecheck && yarn run format",
-    "build": "yarn run prepare",
+    "check": "npm run lint && yarn run typecheck && yarn run format",
+    "build": "npm run prepare",
     "prepare": "del-cli lib && bob build"
   },
   "repository": {
@@ -126,6 +125,5 @@
         }
       ]
     ]
-  },
-  "packageManager": "yarn@4.10.3"
+  }
 }
