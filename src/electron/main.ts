@@ -53,7 +53,11 @@ async function moveFile(
   destPath: string,
   _options: FileOptions
 ) {
-  await fs.rename(filepath, destPath);
+  try {
+    await fs.rename(filepath, destPath);
+  } catch {
+    // swallow error
+  }
 }
 
 async function copyFile(
@@ -62,7 +66,11 @@ async function copyFile(
   destPath: string,
   _options: FileOptions
 ) {
-  await fs.copyFile(filepath, destPath);
+  try {
+    await fs.copyFile(filepath, destPath);
+  } catch {
+    // swallow error
+  }
 }
 
 async function unlink(_event: IpcMainInvokeEvent, filepath: string) {
@@ -90,7 +98,11 @@ async function readFile(
   filepath: string,
   _options: FileOptions
 ) {
-  return await fs.readFile(filepath, "base64");
+  try {
+    return await fs.readFile(filepath, "base64");
+  } catch {
+    return "";
+  }
 }
 
 async function writeFile(
@@ -99,10 +111,14 @@ async function writeFile(
   contents: string,
   _options: ObjectEncodingOptions
 ) {
-  // RNFS index.ts always base64-encodes content before passing to native modules.
-  // Decode back to a raw Buffer and write binary.
-  const decodedContents = Buffer.from(contents, "base64");
-  await fs.writeFile(filepath, decodedContents);
+  try {
+    // RNFS index.ts always base64-encodes content before passing to native modules.
+    // Decode back to a raw Buffer and write binary.
+    const decodedContents = Buffer.from(contents, "base64");
+    await fs.writeFile(filepath, decodedContents);
+  } catch {
+    // swallow error
+  }
 }
 
 async function initPaths(_event: IpcMainInvokeEvent) {
@@ -113,16 +129,20 @@ async function readDir(
   _event: IpcMainInvokeEvent,
   dirPath: string
 ): Promise<ReadDirEntry[]> {
-  const dirEntries = await fs.opendir(dirPath);
+  try {
+    const dirEntries = await fs.opendir(dirPath);
 
-  const entries: ReadDirEntry[] = [];
+    const entries: ReadDirEntry[] = [];
 
-  for await (const dirEntry of dirEntries) {
-    const result = await getStat(path.join(dirPath, dirEntry.name));
-    entries.push(result);
+    for await (const dirEntry of dirEntries) {
+      const result = await getStat(path.join(dirPath, dirEntry.name));
+      entries.push(result);
+    }
+
+    return entries;
+  } catch {
+    return [];
   }
-
-  return entries;
 }
 
 async function getStat(filepath: string): Promise<ReadDirEntry> {
@@ -142,7 +162,11 @@ async function appendFile(
   filepath: string,
   contents: string
 ) {
-  await fs.appendFile(filepath, contents, "base64");
+  try {
+    await fs.appendFile(filepath, contents, "base64");
+  } catch {
+    // swallow error
+  }
 }
 
 async function stat(_event: IpcMainInvokeEvent, filepath: string) {
@@ -223,11 +247,15 @@ async function _streamFile(
 }
 
 async function getFSInfo(_event: IpcMainInvokeEvent) {
-  const st = await fs.statfs(os.homedir());
-  return {
-    freeSpace: st.bfree * st.bsize,
-    totalSpace: st.blocks * st.bsize
-  };
+  try {
+    const st = await fs.statfs(os.homedir());
+    return {
+      freeSpace: st.bfree * st.bsize,
+      totalSpace: st.blocks * st.bsize
+    };
+  } catch {
+    return { freeSpace: 0, totalSpace: 0 };
+  }
 }
 
 export const filesystem = {

@@ -54,6 +54,26 @@ describe("electron/main filesystem API", () => {
       const raw = await fs.readFile(filePath);
       expect(Buffer.compare(raw, bytes)).toBe(0);
     });
+
+    it("readFile returns empty string for non-existing file", async () => {
+      const result = await filesystem.api.readFile(
+        event,
+        path.join(tmpDir, "nope.txt"),
+        {}
+      );
+      expect(result).toBe("");
+    });
+
+    it("writeFile does not throw for invalid path", async () => {
+      await expect(
+        filesystem.api.writeFile(
+          event,
+          path.join(tmpDir, "no", "such", "dir", "file.txt"),
+          Buffer.from("data").toString("base64"),
+          {}
+        )
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe("exists", () => {
@@ -99,6 +119,17 @@ describe("electron/main filesystem API", () => {
       const content = await fs.readFile(dest, "utf8");
       expect(content).toBe("copy me");
     });
+
+    it("does not throw for non-existing source", async () => {
+      await expect(
+        filesystem.api.copyFile(
+          event,
+          path.join(tmpDir, "nope.txt"),
+          path.join(tmpDir, "dest.txt"),
+          {}
+        )
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe("moveFile", () => {
@@ -112,6 +143,17 @@ describe("electron/main filesystem API", () => {
       expect(await filesystem.api.exists(event, src)).toBe(false);
       const content = await fs.readFile(dest, "utf8");
       expect(content).toBe("move me");
+    });
+
+    it("does not throw for non-existing source", async () => {
+      await expect(
+        filesystem.api.moveFile(
+          event,
+          path.join(tmpDir, "nope.txt"),
+          path.join(tmpDir, "dest.txt"),
+          {}
+        )
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -143,6 +185,16 @@ describe("electron/main filesystem API", () => {
 
       const content = await fs.readFile(filePath, "utf8");
       expect(content).toBe("first-second");
+    });
+
+    it("does not throw for invalid path", async () => {
+      await expect(
+        filesystem.api.appendFile(
+          event,
+          path.join(tmpDir, "no", "such", "dir", "file.txt"),
+          Buffer.from("data").toString("base64")
+        )
+      ).resolves.toBeUndefined();
     });
   });
 
@@ -180,6 +232,14 @@ describe("electron/main filesystem API", () => {
       expect(names).toEqual(["a.txt", "b.txt"]);
       expect(entries[0]!.path).toContain("readdir-test");
       expect(typeof entries[0]!.size).toBe("number");
+    });
+
+    it("returns empty array for non-existing directory", async () => {
+      const entries = await filesystem.api.readDir(
+        event,
+        path.join(tmpDir, "nope")
+      );
+      expect(entries).toEqual([]);
     });
   });
 
