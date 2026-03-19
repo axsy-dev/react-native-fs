@@ -134,7 +134,7 @@ export class Uploader {
     // Create a ReadableStream for the request body
     const encoder = new TextEncoder();
     let byteSentTotal = 0;
-    const uploader = this;
+    const isAborted = () => this.abort;
 
     const stream = new ReadableStream({
       start(controller) {
@@ -148,7 +148,7 @@ export class Uploader {
             fileCount = 0;
             for (const file of params.files) {
               // Check if aborted
-              if (uploader.abort) {
+              if (isAborted()) {
                 controller.error(new Error("Upload aborted"));
                 return;
               }
@@ -165,7 +165,7 @@ export class Uploader {
 
               await new Promise<void>((resolve, reject) => {
                 fileStream.on("data", (chunk: string | Buffer) => {
-                  if (uploader.abort) {
+                  if (isAborted()) {
                     fileStream.destroy();
                     controller.error(new Error("Upload aborted"));
                     reject(new Error("Upload aborted"));

@@ -479,9 +479,7 @@ var RNFS = {
     );
   },
 
-  downloadFile(
-    options: DownloadFileOptions
-  ): {
+  downloadFile(options: DownloadFileOptions): {
     jobId: number;
     promise: Promise<DownloadResult>;
   } {
@@ -563,9 +561,7 @@ var RNFS = {
     };
   },
 
-  uploadFiles(
-    options: UploadFileOptions
-  ): {
+  uploadFiles(options: UploadFileOptions): {
     jobId: number;
     promise: Promise<UploadResult>;
   } {

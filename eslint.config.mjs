@@ -24,6 +24,6 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['node_modules/', 'lib/', 'src/utf8.ts', 'babel.config.js'],
+    ignores: ['node_modules/', 'lib/', 'src/utf8.ts', 'babel.config.js', 'react-native.config.js'],
   },
 ]);

@@ -46,9 +46,11 @@
     "typecheck": "tsc",
     "format": "prettier --check .",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
-    "check": "npm run lint && yarn run typecheck && yarn run format",
+    "test": "jest --config jest.config.cjs",
+    "check": "npm run lint && npm run typecheck && npm run format && npm run test",
     "build": "npm run prepare",
-    "prepare": "del-cli lib && bob build"
+    "prepare": "del-cli lib && bob build",
+    "all": "npm run check && npm run build"
   },
   "repository": {
     "type": "git",
@@ -96,6 +98,7 @@
     "react-native": "0.73.0",
     "react-native-builder-bob": "^0.40.13",
     "release-it": "^19.0.4",
+    "ts-jest": "^29.4.6",
     "turbo": "^2.5.6",
     "typescript": "5.5.3"
   },
