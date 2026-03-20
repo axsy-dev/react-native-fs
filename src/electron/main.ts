@@ -41,7 +41,7 @@ async function mkdir(
   _options: MkdirOptions
 ) {
   try {
-    await fs.mkdir(dirpath);
+    await fs.mkdir(dirpath, { recursive: true });
   } catch (e) {
     // swallow error
   }
