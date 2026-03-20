@@ -106,6 +106,14 @@ describe("electron/main filesystem API", () => {
         filesystem.api.mkdir(event, dirPath, {})
       ).resolves.toBeUndefined();
     });
+
+    it("creates nested directories recursively", async () => {
+      const dirPath = path.join(tmpDir, "parent", "child", "grandchild");
+      await filesystem.api.mkdir(event, dirPath, {});
+
+      const stat = await fs.stat(dirPath);
+      expect(stat.isDirectory()).toBe(true);
+    });
   });
 
   describe("copyFile", () => {
