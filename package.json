@@ -1,6 +1,6 @@
 {
   "name": "react-native-fs",
-  "version": "2.16.14",
+  "version": "2.16.15",
   "description": "Native filesystem access for react-native",
   "type": "module",
   "main": "./src/index.ts",
