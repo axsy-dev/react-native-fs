@@ -263,6 +263,81 @@ describe("electron/main filesystem API", () => {
     });
   });
 
+  describe("downloadFile", () => {
+    const originalFetch = global.fetch;
+
+    afterEach(() => {
+      global.fetch = originalFetch;
+    });
+
+    function mockFetchWithChunks(chunks: Uint8Array[]) {
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const chunk of chunks) {
+            controller.enqueue(chunk);
+          }
+          controller.close();
+        }
+      });
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        body
+      }) as unknown as typeof fetch;
+    }
+
+    it("file is fully readable immediately after resolving", async () => {
+      // Contract: when downloadFile resolves, the file is fully flushed
+      // and the fd is closed. (In production the bug surfaced over IPC,
+      // where the renderer's follow-up readFile raced the main process's
+      // pending stream flush; this test exercises the happy path.)
+      const expected = Buffer.alloc(1024 * 64, "x");
+      const mid = expected.length / 2;
+      mockFetchWithChunks([
+        new Uint8Array(expected.subarray(0, mid)),
+        new Uint8Array(expected.subarray(mid))
+      ]);
+
+      const toFile = path.join(tmpDir, "download-flush.bin");
+      const result = await filesystem.api.downloadFile(event, {
+        jobId: 1,
+        fromUrl: "https://example.test/file.bin",
+        toFile,
+        headers: {},
+        background: false,
+        progressDivider: 0,
+        readTimeout: 0,
+        connectionTimeout: 0
+      });
+
+      expect(result.bytesWritten).toBe(expected.length);
+      const onDisk = await fs.readFile(toFile);
+      expect(Buffer.compare(onDisk, expected)).toBe(0);
+    });
+
+    it("propagates fetch errors", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+        body: null
+      }) as unknown as typeof fetch;
+
+      await expect(
+        filesystem.api.downloadFile(event, {
+          jobId: 2,
+          fromUrl: "https://example.test/missing",
+          toFile: path.join(tmpDir, "missing.bin"),
+          headers: {},
+          background: false,
+          progressDivider: 0,
+          readTimeout: 0,
+          connectionTimeout: 0
+        })
+      ).rejects.toThrow(/Failed to download file/);
+    });
+  });
+
   describe("main.init", () => {
     it("registers IPC handlers for all API methods", () => {
       const { ipcMain } = require("electron");

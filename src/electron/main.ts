@@ -195,13 +195,22 @@ async function downloadFile(
 
   const reader = body.getReader();
   const fd = await fs.open(options.toFile, "w");
+  // fd.createWriteStream() defaults to autoClose: true, so the stream
+  // takes ownership of the fd and closes it on "close" / on destroy().
   const writer = fd.createWriteStream();
 
   const bytesDone = await _streamFile(reader, writer);
 
-  writer.end();
-
-  await fd.close();
+  // writer.end() only *signals* end-of-stream; pending chunks are still
+  // being flushed to the OS, and the fd has not yet been closed. If we
+  // resolve here, a renderer that immediately calls readFile() over IPC
+  // can race and observe an empty or partial file. Wait for "close" so
+  // the bytes are flushed and the fd is released before we reply.
+  await new Promise<void>((resolve, reject) => {
+    writer.once("close", () => resolve());
+    writer.once("error", reject);
+    writer.end();
+  });
 
   return {
     jobId: options.jobId,
