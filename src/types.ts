@@ -67,6 +67,7 @@ export type DownloadFileOptions = {
   background?: boolean; // Continue the download in the background after the app terminates (iOS only)
   discretionary?: boolean; // Allow the OS to control the timing and speed of the download to improve perceived performance  (iOS only)
   cacheable?: boolean; // Whether the download can be stored in the shared NSURLCache (iOS only)
+  progressInterval?: number;
   progressDivider?: number;
   begin?: (res: DownloadBeginCallbackResult) => void;
   progress?: (res: DownloadProgressCallbackResult) => void;
@@ -81,9 +82,13 @@ export type DownloadBridgeOptions = {
   toFile: string;
   headers: Headers;
   background: boolean; // iOS only
+  progressInterval: number;
   progressDivider: number;
   readTimeout: number;
   connectionTimeout: number;
+  hasBeginCallback: boolean;
+  hasProgressCallback: boolean;
+  hasResumableCallback: boolean;
 };
 
 export type UploadFileOptions = {

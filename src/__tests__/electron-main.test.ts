@@ -305,9 +305,13 @@ describe("electron/main filesystem API", () => {
         toFile,
         headers: {},
         background: false,
+        progressInterval: 0,
         progressDivider: 0,
         readTimeout: 0,
-        connectionTimeout: 0
+        connectionTimeout: 0,
+        hasBeginCallback: false,
+        hasProgressCallback: false,
+        hasResumableCallback: false
       });
 
       expect(result.bytesWritten).toBe(expected.length);
@@ -330,9 +334,13 @@ describe("electron/main filesystem API", () => {
           toFile: path.join(tmpDir, "missing.bin"),
           headers: {},
           background: false,
+          progressInterval: 0,
           progressDivider: 0,
           readTimeout: 0,
-          connectionTimeout: 0
+          connectionTimeout: 0,
+          hasBeginCallback: false,
+          hasProgressCallback: false,
+          hasResumableCallback: false
         })
       ).rejects.toThrow(/Failed to download file/);
     });
