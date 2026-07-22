@@ -543,9 +543,13 @@ var RNFS = {
       toFile: normalizeFilePath(options.toFile),
       headers: options.headers || {},
       background: !!options.background,
+      progressInterval: options.progressInterval || 0,
       progressDivider: options.progressDivider || 0,
       readTimeout: options.readTimeout || 15000,
-      connectionTimeout: options.connectionTimeout || 5000
+      connectionTimeout: options.connectionTimeout || 5000,
+      hasBeginCallback: options.begin instanceof Function,
+      hasProgressCallback: options.progress instanceof Function,
+      hasResumableCallback: options.resumable instanceof Function
     };
 
     return {
